@@ -1,5 +1,5 @@
 use clap::{Parser};
-use uuid::{Uuid};
+use uuid::{Uuid, Builder};
 
 /// Convert a string slice to an integer, the base is determind from the prefix.
 ///
@@ -170,5 +170,18 @@ fn main() {
     let edate = match cli.edate {
         Some(edate) => edate,
         None => chrono::Local::today().naive_local()
+    };
+
+    let uuid = match cli.uuid {
+        Some(uuid) => uuid,
+        None => {
+            let mut bytes: Vec<u8> = Vec::with_capacity(10);
+            bytes.extend_from_slice(&u16::to_le_bytes(cli.pid));
+            bytes.extend_from_slice(&u16::to_le_bytes(cli.pver));
+            bytes.extend_from_slice(&u16::to_le_bytes(cli.prev));
+            bytes.extend_from_slice(&u32::to_le_bytes(cli.serial));
+            let digest = md5::compute(&bytes);
+            Builder::from_md5_bytes(*digest).into_uuid()
+        }
     };
 }
