@@ -1,4 +1,5 @@
 use clap::{Parser};
+use uuid::{Uuid};
 
 /// Convert a string slice to an integer, the base is determind from the prefix.
 ///
@@ -133,7 +134,7 @@ struct Cli {
     /// The UUID for the device, will be calculated from the pid, pver, prev
     /// and serial if omitted.
     #[clap(long)]
-    uuid: Option<String>,
+    uuid: Option<Uuid>,
     /// The product ID of the device.
     #[clap(long, parse(try_from_str = parse_u16))]
     pid: u16,
