@@ -76,6 +76,29 @@ fn test_parse_u32() {
     assert_eq!(parse_u32("-1"), Err("invalid digit found in string".to_string()));
 }
 
+/// Validate a string to be max 255 bytes long.
+///
+/// Check if a given string can fit into a 255 byte buffer.
+///
+/// # Examples
+/// ```
+/// assert_eq!(parse_string_max255("foo bar"), Ok("foo bar".to_string()));
+/// ```
+fn parse_string_max255(src: &str) -> Result<String, String> {
+    if src.as_bytes().len() >= 256 {
+        Err("string to long to fit into target memory (max 255 chars/bytes)".to_string())
+    } else {
+        Ok(src.to_string())
+    }
+}
+
+#[test]
+fn test_parse_string_max255() {
+    assert_eq!(parse_string_max255("foo bar"), Ok("foo bar".to_string()));
+    assert_eq!(parse_string_max255("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis ut diam quam nulla porttitor massa id neque. Facilisis volutpat est velit egestas dui id ornare arcu. Hac habitasse platea dict"),
+               Err("string to long to fit into target memory (max 255 chars/bytes)".to_string()));
+}
+
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 struct Cli {
@@ -93,10 +116,10 @@ struct Cli {
     #[clap(long, parse(try_from_str = parse_u16))]
     prev: u16,
     /// The vendor string for the device.
-    #[clap(long, default_value = "Kunbus GmbH")]
+    #[clap(long, default_value = "Kunbus GmbH", parse(try_from_str = parse_string_max255))]
     vstr: String,
     /// The product string for the device.
-    #[clap(long)]
+    #[clap(long, parse(try_from_str = parse_string_max255))]
     pstr: String,
     /// The device tree overlay name for the device.
     #[clap(long)]
