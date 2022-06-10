@@ -1,4 +1,5 @@
 use clap::{Parser};
+use eui48::MacAddress;
 use uuid::{Uuid, Builder};
 
 /// Convert a string slice to an integer, the base is determind from the prefix.
@@ -161,7 +162,7 @@ struct Cli {
     edate: Option<chrono::NaiveDate>,
     /// The (first) mac address of the device.
     #[clap(long)]
-    mac: String,
+    mac: MacAddress,
 }
 
 fn main() {

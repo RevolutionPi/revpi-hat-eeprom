@@ -10,3 +10,4 @@ clap = { version = "3.1", features = ["derive"] }
 chrono = "0.4"
 uuid = { version = "1.0", feature = ["v4"] }
 md5 = { version = "0.7" }
+eui48 = "1.1"
