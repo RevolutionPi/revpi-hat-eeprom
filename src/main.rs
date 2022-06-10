@@ -165,4 +165,9 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
+
+    let edate = match cli.edate {
+        Some(edate) => edate,
+        None => chrono::Local::today().naive_local()
+    };
 }
