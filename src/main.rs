@@ -185,4 +185,15 @@ fn main() {
             Builder::from_md5_bytes(*digest).into_uuid()
         }
     };
+
+    println!("PID:    {:#04x}", cli.pid);
+    println!("PVER:   {:#04x}", cli.pver);
+    println!("PREV:   {:02}", cli.prev);
+    println!("VSTR:   {}", cli.vstr);
+    println!("PSTR:   {}", cli.pstr);
+    println!("DTSTR:  {}", cli.dtstr);
+    println!("SERIAL: {}", cli.serial);
+    println!("EDATE:  {}", edate);
+    println!("MAC:    {}", cli.mac);
+    println!("UUID:   {}", uuid);
 }
