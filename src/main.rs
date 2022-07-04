@@ -21,7 +21,7 @@ fn parse_prefixed_int<T: num::Unsigned>(src: &str) -> Result<T, String>
     } else if src.starts_with("0x") {
         T::from_str_radix(&src[2..], 16)
     } else {
-        T::from_str_radix(&src, 10)
+        T::from_str_radix(src, 10)
     };
     match val {
         Ok(val) => Ok(val),
