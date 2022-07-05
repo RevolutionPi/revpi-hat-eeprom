@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
-use clap::{Parser};
+use clap::Parser;
 use eui48::MacAddress;
 use uuid::{Uuid, Builder};
 
