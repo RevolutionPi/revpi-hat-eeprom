@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
+use chrono::NaiveDate;
 use clap::Parser;
 use eui48::MacAddress;
 use uuid::{Uuid, Builder};
@@ -84,8 +85,7 @@ fn test_parse_string_max255() {
 /// ```
 fn parse_date_iso8601(src: &str) -> Result<chrono::NaiveDate, String>
 {
-    let parse_from_str = chrono::NaiveDate::parse_from_str;
-    let date = parse_from_str(src, "%F");
+    let date = NaiveDate::parse_from_str(src, "%F");
     match date {
         Ok(date) => Ok(date),
         Err(e) => Err(format!("{e}"))
@@ -94,8 +94,8 @@ fn parse_date_iso8601(src: &str) -> Result<chrono::NaiveDate, String>
 
 #[test]
 fn test_parse_date_rfc3339() {
-    assert_eq!(parse_date_iso8601("2022-03-15"), Ok(chrono::NaiveDate::from_ymd(2022, 3, 15)));
-    assert_eq!(parse_date_iso8601("2022-3-15"), Ok(chrono::NaiveDate::from_ymd(2022, 3, 15)));
+    assert_eq!(parse_date_iso8601("2022-03-15"), Ok(NaiveDate::from_ymd(2022, 3, 15)));
+    assert_eq!(parse_date_iso8601("2022-3-15"), Ok(NaiveDate::from_ymd(2022, 3, 15)));
     assert_eq!(parse_date_iso8601("2O22-03-15"), Err("input contains invalid characters".to_string()));
     assert_eq!(parse_date_iso8601("2022-030-15"), Err("input contains invalid characters".to_string()));
     assert_eq!(parse_date_iso8601("2022-13-15"), Err("input is out of range".to_string()));
