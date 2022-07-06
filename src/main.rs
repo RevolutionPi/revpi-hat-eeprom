@@ -4,7 +4,26 @@
 use chrono::NaiveDate;
 use clap::Parser;
 use eui48::MacAddress;
-use uuid::{Uuid, Builder};
+use std::error::Error;
+use std::path::PathBuf;
+use std::fs::File;
+use std::process;
+use thiserror::Error;
+
+mod gpio;
+mod revpi_hat_eeprom;
+
+#[derive(Error, Debug)]
+pub enum RevPiError {
+    #[error("JSON parse error")]
+    JsonError(#[from] serde_json::Error),
+    #[error("Config validation error")]
+    Error(String),
+    #[error("Validation error")]
+    ValidationError(String),
+    #[error("unknown error")]
+    Unknown,
+}
 
 /// Convert a string slice to an integer, the base is determind from the prefix.
 ///
@@ -52,29 +71,6 @@ fn test_parse_prefixed_int() {
     assert_eq!(parse_prefixed_int::<u16>("-1"), Err("invalid digit found in string".to_string()));
 }
 
-/// Validate a string to be max 255 bytes long.
-///
-/// Check if a given string can fit into a 255 byte buffer.
-///
-/// # Examples
-/// ```
-/// assert_eq!(parse_string_max255("foo bar"), Ok("foo bar".to_string()));
-/// ```
-fn parse_string_max255(src: &str) -> Result<String, String> {
-    if src.as_bytes().len() >= 256 {
-        Err("string to long to fit into target memory (max 255 chars/bytes)".to_string())
-    } else {
-        Ok(src.to_string())
-    }
-}
-
-#[test]
-fn test_parse_string_max255() {
-    assert_eq!(parse_string_max255("foo bar"), Ok("foo bar".to_string()));
-    assert_eq!(parse_string_max255("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis ut diam quam nulla porttitor massa id neque. Facilisis volutpat est velit egestas dui id ornare arcu. Hac habitasse platea dict"),
-               Err("string to long to fit into target memory (max 255 chars/bytes)".to_string()));
-}
-
 /// Parse and validate a string for a date of the format YYYY-MM-DD (ISO8601/RFC3339).
 ///
 /// Parse a string of the form YYYY-MM-DD (ISO8601/RFC3339) and return a
@@ -104,69 +100,79 @@ fn test_parse_date_rfc3339() {
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
-struct Cli {
-    /// The UUID for the device, will be calculated from the pid, pver, prev
-    /// and serial if omitted.
-    #[clap(long)]
-    uuid: Option<Uuid>,
-    /// The product ID of the device.
-    #[clap(long, parse(try_from_str = parse_prefixed_int))]
-    pid: u16,
-    /// The product version of device.
-    #[clap(long, parse(try_from_str = parse_prefixed_int))]
-    pver: u16,
-    /// The product revision of the device.
-    #[clap(long, parse(try_from_str = parse_prefixed_int))]
-    prev: u16,
-    /// The vendor string for the device.
-    #[clap(long, default_value = "Kunbus GmbH", parse(try_from_str = parse_string_max255))]
-    vstr: String,
-    /// The product string for the device.
-    #[clap(long, parse(try_from_str = parse_string_max255))]
-    pstr: String,
-    /// The device tree overlay name for the device.
-    #[clap(long)]
-    dtstr: String,
+pub struct Cli {
     /// The serial number for the device.
     #[clap(long, parse(try_from_str = parse_prefixed_int))]
-    serial: u32,
+    pub serial: u32,
     /// The end test date for the device. In the format YYYY-MM-DD (ISO8601/RFC3339). If omitted the current date is used.
     #[clap(long, parse(try_from_str = parse_date_iso8601))]
-    edate: Option<chrono::NaiveDate>,
+    pub edate: Option<chrono::NaiveDate>,
     /// The (first) mac address of the device.
     #[clap(long)]
-    mac: MacAddress,
+    pub mac: MacAddress,
+    /// Configuration file in JSON format
+    #[clap(value_parser, value_name = "CONFIG")]
+    pub config: PathBuf,
+    /// Output file name
+    #[clap(value_parser, value_name = "OUTPUT", default_value = "out.eep")]
+    pub outfile: PathBuf,
 }
 
 fn main() {
     let cli = Cli::parse();
+
+    let config = match std::fs::read_to_string(&cli.config) {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("ERROR: Can't read config file `{}': {e}",
+                      cli.config.to_string_lossy());
+            process::exit(1)
+        }
+    };
+
+    let config = match revpi_hat_eeprom::parse_config(&config) {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("ERROR: Invalid config file `{}': {e}: {}",
+                cli.config.to_string_lossy(), e.source().unwrap());
+            process::exit(1);
+        }
+    };
+
+    let _outfile = match File::create(&cli.outfile) {
+        Ok(outfile) => outfile,
+        Err(e) => {
+            eprintln!("ERROR: Can't create file `{}`: {e}",
+                      cli.outfile.to_string_lossy());
+            process::exit(1)
+        }
+    };
 
     let edate = match cli.edate {
         Some(edate) => edate,
         None => chrono::Local::today().naive_local()
     };
 
-    let uuid = match cli.uuid {
-        Some(uuid) => uuid,
-        None => {
-            let mut bytes: Vec<u8> = Vec::with_capacity(10);
-            bytes.extend_from_slice(&u16::to_le_bytes(cli.pid));
-            bytes.extend_from_slice(&u16::to_le_bytes(cli.pver));
-            bytes.extend_from_slice(&u16::to_le_bytes(cli.prev));
-            bytes.extend_from_slice(&u32::to_le_bytes(cli.serial));
-            let digest = md5::compute(&bytes);
-            Builder::from_md5_bytes(*digest).into_uuid()
-        }
+    let uuid = {
+        let mut bytes: Vec<u8> = Vec::with_capacity(10);
+        bytes.extend_from_slice(&u16::to_le_bytes(config.pid));
+        bytes.extend_from_slice(&u16::to_le_bytes(config.pver));
+        bytes.extend_from_slice(&u16::to_le_bytes(config.prev));
+        bytes.extend_from_slice(&u32::to_le_bytes(cli.serial));
+        let digest = md5::compute(&bytes);
+        uuid::Builder::from_md5_bytes(*digest).into_uuid()
     };
 
-    println!("PID:    {:#04x}", cli.pid);
-    println!("PVER:   {:#04x}", cli.pver);
-    println!("PREV:   {:02}", cli.prev);
-    println!("VSTR:   {}", cli.vstr);
-    println!("PSTR:   {}", cli.pstr);
-    println!("DTSTR:  {}", cli.dtstr);
+    println!("PID:    {:}", config.pid);
+    println!("PVER:   {:} ({})", config.pver, config.pver as f32 / 100.0);
+    println!("PREV:   {:02}", config.prev);
+    println!("VSTR:   {}", config.vstr);
+    println!("PSTR:   {}", config.pstr);
+    println!("DTSTR:  {}", config.dtstr);
     println!("SERIAL: {}", cli.serial);
     println!("EDATE:  {}", edate);
     println!("MAC:    {}", cli.mac);
     println!("UUID:   {}", uuid);
+
+    println!("\nPR#:    PR1{:05}R{:02}", config.pid, config.prev);
 }
