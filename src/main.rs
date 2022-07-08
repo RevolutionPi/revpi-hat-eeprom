@@ -15,8 +15,9 @@ use uuid::{Uuid, Builder};
 /// ```
 /// assert_eq!(parse_prefixed_int("0xA"), Ok(10));
 /// ```
-fn parse_prefixed_int<T: num::Unsigned>(src: &str) -> Result<T, String>
-    where T: num::Num<FromStrRadixErr = std::num::ParseIntError>,
+fn parse_prefixed_int<T>(src: &str) -> Result<T, String>
+    where T: num::Unsigned
+        + num::Num<FromStrRadixErr = std::num::ParseIntError>
 {
     let val = if src.starts_with("0b") {
         T::from_str_radix(&src[2..], 2)
