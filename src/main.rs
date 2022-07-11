@@ -11,6 +11,7 @@ use std::process;
 use thiserror::Error;
 
 mod gpio;
+mod validate;
 mod revpi_hat_eeprom;
 
 #[derive(Error, Debug)]
@@ -138,6 +139,14 @@ fn main() {
             process::exit(1);
         }
     };
+
+    match config.validate() {
+        Ok(_) => (),
+        Err(e) => {
+            eprintln!("ERROR: Invalid config: {e}: {}", e);
+            process::exit(1);
+        }
+    }
 
     let _outfile = match File::create(&cli.outfile) {
         Ok(outfile) => outfile,

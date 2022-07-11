@@ -3,6 +3,10 @@
 
 use serde::{Serialize, Deserialize};
 
+use crate::RevPiError;
+
+const MAX_GPIOS: usize = 28;
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioBankDrive {
@@ -78,4 +82,35 @@ pub struct GpioBank {
     slew: GpioBankSlew,
     hysteresis: GpioBankHysteresis,
     gpios: Vec<GpioPin>,
+}
+
+impl GpioBank {
+    pub fn validate(&self) -> Result<(), RevPiError> {
+        let mut configured_gpios: Vec<bool> = vec![false; MAX_GPIOS];
+        for gpio in &self.gpios {
+            if gpio.gpio == 0 || gpio.gpio == 1 {
+                return Err(
+                    RevPiError::ValidationError(
+                        format!("gpio# mustn't be 0 or 1 (they are used for the HAT EEPROM): {}", gpio.gpio)
+                    ).into()
+                )
+            }
+            if gpio.gpio as usize >= MAX_GPIOS {
+                return Err(
+                    RevPiError::ValidationError(
+                        format!("gpio#: {} >= {}", gpio.gpio, MAX_GPIOS)
+                    ).into()
+                )
+            }
+            if configured_gpios[gpio.gpio as usize] {
+                return Err(
+                    RevPiError::ValidationError(
+                        format!("gpio#: {} defined more then once", gpio.gpio)
+                    ).into()
+                )
+            }
+            configured_gpios[gpio.gpio as usize] = true;
+        }
+        Ok(())
+    }
 }
