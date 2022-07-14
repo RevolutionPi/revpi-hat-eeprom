@@ -10,6 +10,7 @@ use crate::validate;
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct RevPiHatEeprom {
+    pub version: u16,
     pub vstr: String,
     pub pstr: String,
     pub pid: u16,
@@ -25,13 +26,12 @@ pub fn parse_config(s: &str) -> Result<RevPiHatEeprom, RevPiError> {
 
 impl RevPiHatEeprom {
     pub fn validate(&self) -> Result<(), RevPiError> {
-        if validate::validate_string_max255(&self.vstr).is_err() {
-            eprintln!("ERROR: Config contains invalid vstr `{}': string to long",
-                      self.vstr);
-        }
-        if validate::validate_string_max255(&self.pstr).is_err() {
-            eprintln!("ERROR: Config contains invalid pstr `{}': string to long",
-                      self.pstr);
+        if self.version != 1 {
+            return Err(
+                RevPiError::ValidationError(
+                    format!("unsupported format version: {}", self.version)
+                ).into()
+            )
         }
         for bank in &self.gpiobanks {
             bank.validate()?;
