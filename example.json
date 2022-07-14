@@ -5,26 +5,28 @@
     "prev": 3,
     "pver": 120,
     "dtstr": "revpi-core-2022",
-    "gpiobank": {
-        "drive": "2mA",
-        "slew": "default",
-        "hysteresis": "enable",
-        "gpios": [
-            {
-                "gpio": 2,
-                "fsel": "input",
-                "pull": "default"
-            },
-            {
-                "gpio": 3,
-                "fsel": "output",
-                "pull": "none"
-            },
-            {
-                "gpio": 4,
-                "fsel": "alt1",
-                "pull": "up"
-            }
-        ]
-    }
+    "gpiobanks": [
+        {
+            "drive": "2mA",
+            "slew": "default",
+            "hysteresis": "enable",
+            "gpios": [
+                {
+                    "gpio": 2,
+                    "fsel": "input",
+                    "pull": "default"
+                },
+                {
+                    "gpio": 3,
+                    "fsel": "output",
+                    "pull": "none"
+                },
+                {
+                    "gpio": 4,
+                    "fsel": "alt1",
+                    "pull": "up"
+                }
+            ]
+        }
+    ]
 }

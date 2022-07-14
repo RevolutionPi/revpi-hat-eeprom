@@ -16,7 +16,7 @@ pub struct RevPiHatEeprom {
     pub prev: u16,
     pub pver: u16,
     pub dtstr: String,
-    pub gpiobank: GpioBank,
+    pub gpiobanks: Vec<GpioBank>,
 }
 
 pub fn parse_config(s: &str) -> Result<RevPiHatEeprom, RevPiError> {
@@ -33,7 +33,9 @@ impl RevPiHatEeprom {
             eprintln!("ERROR: Config contains invalid pstr `{}': string to long",
                       self.pstr);
         }
-        self.gpiobank.validate()?;
+        for bank in &self.gpiobanks {
+            bank.validate()?;
+        }
         Ok(())
     }
 }
