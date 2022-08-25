@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
 use crate::RevPiError;
+use rpi_eep::gpio_map;
 use serde::{Deserialize, Serialize};
 
 const MAX_GPIOS: usize = 28;
@@ -36,6 +37,38 @@ pub enum GpioBankDrive {
     Drive16mA,
 }
 
+impl From<gpio_map::GpioDrive> for GpioBankDrive {
+    fn from(drive: gpio_map::GpioDrive) -> Self {
+        match drive {
+            gpio_map::GpioDrive::Default => GpioBankDrive::Default,
+            gpio_map::GpioDrive::Drive2mA => GpioBankDrive::Drive2mA,
+            gpio_map::GpioDrive::Drive4mA => GpioBankDrive::Drive4mA,
+            gpio_map::GpioDrive::Drive6mA => GpioBankDrive::Drive6mA,
+            gpio_map::GpioDrive::Drive8mA => GpioBankDrive::Drive8mA,
+            gpio_map::GpioDrive::Drive10mA => GpioBankDrive::Drive10mA,
+            gpio_map::GpioDrive::Drive12mA => GpioBankDrive::Drive12mA,
+            gpio_map::GpioDrive::Drive14mA => GpioBankDrive::Drive14mA,
+            gpio_map::GpioDrive::Drive16mA => GpioBankDrive::Drive16mA,
+        }
+    }
+}
+
+impl From<GpioBankDrive> for gpio_map::GpioDrive {
+    fn from(drive: GpioBankDrive) -> Self {
+        match drive {
+            GpioBankDrive::Default => gpio_map::GpioDrive::Default,
+            GpioBankDrive::Drive2mA => gpio_map::GpioDrive::Drive2mA,
+            GpioBankDrive::Drive4mA => gpio_map::GpioDrive::Drive4mA,
+            GpioBankDrive::Drive6mA => gpio_map::GpioDrive::Drive6mA,
+            GpioBankDrive::Drive8mA => gpio_map::GpioDrive::Drive8mA,
+            GpioBankDrive::Drive10mA => gpio_map::GpioDrive::Drive10mA,
+            GpioBankDrive::Drive12mA => gpio_map::GpioDrive::Drive12mA,
+            GpioBankDrive::Drive14mA => gpio_map::GpioDrive::Drive14mA,
+            GpioBankDrive::Drive16mA => gpio_map::GpioDrive::Drive16mA,
+        }
+    }
+}
+
 /// This defines possible values for the pin drive slew rate
 ///
 /// The slew rate can only be set per bank. So this will apply for all pins
@@ -50,6 +83,26 @@ pub enum GpioBankSlew {
     Default,
     RateLimiting,
     NoLimit,
+}
+
+impl From<gpio_map::GpioSlew> for GpioBankSlew {
+    fn from(slew: gpio_map::GpioSlew) -> Self {
+        match slew {
+            gpio_map::GpioSlew::Default => GpioBankSlew::Default,
+            gpio_map::GpioSlew::RateLimiting => GpioBankSlew::RateLimiting,
+            gpio_map::GpioSlew::NoLimit => GpioBankSlew::NoLimit,
+        }
+    }
+}
+
+impl From<GpioBankSlew> for gpio_map::GpioSlew {
+    fn from(slew: GpioBankSlew) -> Self {
+        match slew {
+            GpioBankSlew::Default => gpio_map::GpioSlew::Default,
+            GpioBankSlew::RateLimiting => gpio_map::GpioSlew::RateLimiting,
+            GpioBankSlew::NoLimit => gpio_map::GpioSlew::NoLimit,
+        }
+    }
 }
 
 /// This defines possible values for the pin drive hysteresis
@@ -68,6 +121,26 @@ pub enum GpioBankHysteresis {
     Enable,
 }
 
+impl From<gpio_map::GpioHysteresis> for GpioBankHysteresis {
+    fn from(hyst: gpio_map::GpioHysteresis) -> Self {
+        match hyst {
+            gpio_map::GpioHysteresis::Default => GpioBankHysteresis::Default,
+            gpio_map::GpioHysteresis::Disable => GpioBankHysteresis::Disable,
+            gpio_map::GpioHysteresis::Enable => GpioBankHysteresis::Enable,
+        }
+    }
+}
+
+impl From<GpioBankHysteresis> for gpio_map::GpioHysteresis {
+    fn from(hyst: GpioBankHysteresis) -> Self {
+        match hyst {
+            GpioBankHysteresis::Default => gpio_map::GpioHysteresis::Default,
+            GpioBankHysteresis::Disable => gpio_map::GpioHysteresis::Disable,
+            GpioBankHysteresis::Enable => gpio_map::GpioHysteresis::Enable,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioFsel {
@@ -81,6 +154,36 @@ pub enum GpioFsel {
     Alt5,
 }
 
+impl From<gpio_map::GpioFsel> for GpioFsel {
+    fn from(fsel: gpio_map::GpioFsel) -> Self {
+        match fsel {
+            gpio_map::GpioFsel::Input => GpioFsel::Input,
+            gpio_map::GpioFsel::Output => GpioFsel::Output,
+            gpio_map::GpioFsel::Alt0 => GpioFsel::Alt0,
+            gpio_map::GpioFsel::Alt1 => GpioFsel::Alt1,
+            gpio_map::GpioFsel::Alt2 => GpioFsel::Alt2,
+            gpio_map::GpioFsel::Alt3 => GpioFsel::Alt3,
+            gpio_map::GpioFsel::Alt4 => GpioFsel::Alt4,
+            gpio_map::GpioFsel::Alt5 => GpioFsel::Alt5,
+        }
+    }
+}
+
+impl From<GpioFsel> for gpio_map::GpioFsel {
+    fn from(fsel: GpioFsel) -> Self {
+        match fsel {
+            GpioFsel::Input => gpio_map::GpioFsel::Input,
+            GpioFsel::Output => gpio_map::GpioFsel::Output,
+            GpioFsel::Alt0 => gpio_map::GpioFsel::Alt0,
+            GpioFsel::Alt1 => gpio_map::GpioFsel::Alt1,
+            GpioFsel::Alt2 => gpio_map::GpioFsel::Alt2,
+            GpioFsel::Alt3 => gpio_map::GpioFsel::Alt3,
+            GpioFsel::Alt4 => gpio_map::GpioFsel::Alt4,
+            GpioFsel::Alt5 => gpio_map::GpioFsel::Alt5,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioPull {
@@ -88,6 +191,28 @@ pub enum GpioPull {
     Up,
     Down,
     None,
+}
+
+impl From<gpio_map::GpioPull> for GpioPull {
+    fn from(pull: gpio_map::GpioPull) -> Self {
+        match pull {
+            gpio_map::GpioPull::Default => GpioPull::Default,
+            gpio_map::GpioPull::Up => GpioPull::Up,
+            gpio_map::GpioPull::Down => GpioPull::Down,
+            gpio_map::GpioPull::NoPull => GpioPull::None,
+        }
+    }
+}
+
+impl From<GpioPull> for gpio_map::GpioPull {
+    fn from(pull: GpioPull) -> Self {
+        match pull {
+            GpioPull::Default => gpio_map::GpioPull::Default,
+            GpioPull::Up => gpio_map::GpioPull::Up,
+            GpioPull::Down => gpio_map::GpioPull::Down,
+            GpioPull::None => gpio_map::GpioPull::NoPull,
+        }
+    }
 }
 
 /// This struct represents a single gpio pin
@@ -111,6 +236,12 @@ pub struct GpioPin {
     gpio: u8,
     fsel: GpioFsel,
     pull: GpioPull,
+}
+
+impl From<GpioPin> for gpio_map::GpioPin {
+    fn from(gpio: GpioPin) -> Self {
+        gpio_map::GpioPin::new(gpio.fsel.into(), gpio.pull.into(), false)
+    }
 }
 
 /// This struct represents the GPIO configuration the the HAT EEPROM

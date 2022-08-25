@@ -21,3 +21,4 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 uuid = { version = "1.1", features = ["serde"] }
+rpi-eep = { path = "../rpi-eep" }
