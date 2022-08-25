@@ -136,22 +136,19 @@ impl GpioBank {
                 return Err(RevPiError::ValidationError(format!(
                     "gpio# mustn't be 0 or 1 (they are used for the HAT EEPROM): {}",
                     gpio.gpio
-                ))
-                .into());
+                )));
             }
             if gpio.gpio as usize >= MAX_GPIOS {
                 return Err(RevPiError::ValidationError(format!(
                     "gpio#: {} >= {}",
                     gpio.gpio, MAX_GPIOS
-                ))
-                .into());
+                )));
             }
             if configured_gpios[gpio.gpio as usize] {
                 return Err(RevPiError::ValidationError(format!(
                     "gpio#: {} defined more then once",
                     gpio.gpio
-                ))
-                .into());
+                )));
             }
             configured_gpios[gpio.gpio as usize] = true;
         }

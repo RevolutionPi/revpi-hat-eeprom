@@ -93,8 +93,7 @@ impl RevPiHatEeprom {
             return Err(RevPiError::ValidationError(format!(
                 "unsupported format version: {}",
                 self.version
-            ))
-            .into());
+            )));
         }
         for bank in &self.gpiobanks {
             bank.validate()?;
