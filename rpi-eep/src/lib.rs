@@ -50,31 +50,32 @@ impl EEP {
         EEP { atoms }
     }
 
-    pub fn push(&mut self, mut atom: EEPAtom) {
+    pub fn push(&mut self, mut atom: EEPAtom) -> Result<(), String> {
         match atom.atype {
             EEPAtomType::VendorInfo => {
                 if !self.atoms.is_empty() {
-                    panic!("Wrong order: vendor info")
+                    return Err("Wrong order: vendor info".to_string());
                 }
             }
             EEPAtomType::GpioMap => {
                 if self.atoms.len() != 1 {
-                    panic!("Wrong order: gpio map")
+                    return Err("Wrong order: gpio map".to_string());
                 }
             }
             EEPAtomType::LinuxDTB => {
                 if self.atoms.len() != 2 {
-                    panic!("Wrong order: dtb")
+                    return Err("Wrong order: dtb".to_string());
                 }
             }
             EEPAtomType::ManufCustomData => {
                 if self.atoms.len() < 2 {
-                    panic!("Wrong order: custom")
+                    return Err("Wrong order: custom".to_string());
                 }
             }
         }
         atom.count = self.atoms.len() as u16;
-        self.atoms.push(atom)
+        self.atoms.push(atom);
+        Ok(())
     }
 }
 
@@ -269,8 +270,34 @@ pub struct EEPAtomVendorData {
 }
 
 impl EEPAtomVendorData {
-    pub fn new(uuid: uuid::Uuid, pid: u16, pver: u16, vstr: String, pstr: String) -> Result<EEPAtomVendorData, ()> {
-        Ok(EEPAtomVendorData { uuid, pid, pver, vstr, pstr})
+    pub fn new(
+        uuid: uuid::Uuid,
+        pid: u16,
+        pver: u16,
+        vstr: String,
+        pstr: String,
+    ) -> Result<EEPAtomVendorData, String> {
+        if vstr.len() > u8::MAX.into() {
+            return Err(format!(
+                "Vendor string to long: {} (max: {} bytes)",
+                vstr.len(),
+                u8::MAX
+            ));
+        }
+        if pstr.len() > u8::MAX.into() {
+            return Err(format!(
+                "Product string to long: {} (max: {} bytes)",
+                vstr.len(),
+                u8::MAX
+            ));
+        }
+        Ok(EEPAtomVendorData {
+            uuid,
+            pid,
+            pver,
+            vstr,
+            pstr,
+        })
     }
 }
 
@@ -286,7 +313,9 @@ impl ToBytes for EEPAtomVendorData {
         }
         buf.extend_from_slice(&self.pid.to_le_bytes());
         buf.extend_from_slice(&self.pver.to_le_bytes());
+        // vstr.len() can't be > u8::MAX (see: EEPAtomVendorData::new()
         buf.push(u8::try_from(self.vstr.len()).unwrap());
+        // pstr.len() can't be > u8::MAX (see: EEPAtomVendorData::new())
         buf.push(u8::try_from(self.pstr.len()).unwrap());
         buf.extend_from_slice(self.vstr.as_bytes());
         buf.extend_from_slice(self.pstr.as_bytes());
@@ -357,6 +386,6 @@ impl ToBytes for EEPAtomCustomData {
     }
 
     fn to_bytes(&self, buf: &mut Vec<u8>) {
-        buf.extend(&self.data)
+        buf.extend(&self.data);
     }
 }
