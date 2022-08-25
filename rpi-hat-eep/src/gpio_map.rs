@@ -176,11 +176,12 @@ impl EEPAtomGpioMapData {
         }
     }
 
-    pub fn push(&mut self, gpio: GpioPin) {
+    pub fn push(&mut self, gpio: GpioPin) -> Result<(), String> {
         if self.gpios.len() >= MAX_GPIOS {
-            panic!("gpios > MAX_GPIOS (28)");
+            return Err(format!("gpios > MAX_GPIOS ({})", MAX_GPIOS));
         }
         self.gpios.push(gpio);
+        Ok(())
     }
 }
 
