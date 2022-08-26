@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: Copyright KUNBUS GmbH
+
+[package]
+name = "rpi-eep"
+version = "0.1.0"
+edition = "2021"
+description = "Library to create RPi hat eeprom images"
+license = "GPL-2.0-or-later"
+authors = ["KUNBUS GmbH <support@kunbus.com>"]
+
+[dependencies]
+crc = "3.0"
+uuid = "1.1"
