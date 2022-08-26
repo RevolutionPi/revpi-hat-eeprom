@@ -1,19 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
-use serde::{Serialize, Deserialize};
-
 use crate::RevPiError;
+use serde::{Deserialize, Serialize};
 
 const MAX_GPIOS: usize = 28;
-
 
 /// This defines possible values for the pin drive strength
 ///
 /// The drive strength can only be set per bank. So this will apply for all pins
 /// of this bank. The drive strength can be set to 2, 4, 6, 8, 10, 12, 14 and
-/// 16 mA. It can also be left at default. Then the actual drive strength depends
-/// not on this configuration.
+/// 16 mA. It can also be left at default. Then the actual drive strength
+/// depends not on this configuration.
 ///
 /// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
 #[derive(Serialize, Deserialize, Debug)]
@@ -35,7 +33,7 @@ pub enum GpioBankDrive {
     #[serde(rename = "14mA")]
     Drive14mA,
     #[serde(rename = "16mA")]
-    Drive16mA
+    Drive16mA,
 }
 
 /// This defines possible values for the pin drive slew rate
@@ -58,8 +56,8 @@ pub enum GpioBankSlew {
 ///
 /// The hysteresis can only be set per bank. So this will apply for all pins
 /// of this bank. The hysteresis can be set to hysteresis disabled and
-/// hysteresis enabled. It can also be left at default. Then the actual hysteresis
-/// depends not on this configuration.
+/// hysteresis enabled. It can also be left at default. Then the actual
+/// hysteresis depends not on this configuration.
 ///
 /// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
 #[derive(Serialize, Deserialize, Debug)]
@@ -135,25 +133,25 @@ impl GpioBank {
         let mut configured_gpios: Vec<bool> = vec![false; MAX_GPIOS];
         for gpio in &self.gpios {
             if gpio.gpio == 0 || gpio.gpio == 1 {
-                return Err(
-                    RevPiError::ValidationError(
-                        format!("gpio# mustn't be 0 or 1 (they are used for the HAT EEPROM): {}", gpio.gpio)
-                    ).into()
-                )
+                return Err(RevPiError::ValidationError(format!(
+                    "gpio# mustn't be 0 or 1 (they are used for the HAT EEPROM): {}",
+                    gpio.gpio
+                ))
+                .into());
             }
             if gpio.gpio as usize >= MAX_GPIOS {
-                return Err(
-                    RevPiError::ValidationError(
-                        format!("gpio#: {} >= {}", gpio.gpio, MAX_GPIOS)
-                    ).into()
-                )
+                return Err(RevPiError::ValidationError(format!(
+                    "gpio#: {} >= {}",
+                    gpio.gpio, MAX_GPIOS
+                ))
+                .into());
             }
             if configured_gpios[gpio.gpio as usize] {
-                return Err(
-                    RevPiError::ValidationError(
-                        format!("gpio#: {} defined more then once", gpio.gpio)
-                    ).into()
-                )
+                return Err(RevPiError::ValidationError(format!(
+                    "gpio#: {} defined more then once",
+                    gpio.gpio
+                ))
+                .into());
             }
             configured_gpios[gpio.gpio as usize] = true;
         }
