@@ -8,23 +8,6 @@ use std::error::Error;
 use std::fs::File;
 use std::path::PathBuf;
 use std::process;
-use thiserror::Error;
-
-mod gpio;
-mod revpi_hat_eeprom;
-mod validate;
-
-#[derive(Error, Debug)]
-pub enum RevPiError {
-    #[error("JSON parse error")]
-    JsonError(#[from] serde_json::Error),
-    #[error("Config validation error")]
-    Error(String),
-    #[error("Validation error")]
-    ValidationError(String),
-    #[error("unknown error")]
-    Unknown,
-}
 
 /// Convert a string slice to an integer, the base is determind from the prefix.
 ///
@@ -153,7 +136,7 @@ fn main() {
         }
     };
 
-    let config = match revpi_hat_eeprom::parse_config(&config) {
+    let config = match revpi_eep::parse_config(&config) {
         Ok(config) => config,
         Err(e) => {
             eprintln!(

@@ -1,23 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # SPDX-FileCopyrightText: Copyright KUNBUS GmbH
 
-[package]
-name = "revpi-hat-eeprom"
-version = "0.1.0"
-edition = "2021"
-description = "Tool to create image files compatible to the RevPi-HAT-EEPROM format"
-repository = "https://github.com/RevolutionPi/revpi-hat-eeprom"
-license = "GPL-2.0-or-later"
-authors = [ "KUNBUS GmbH <support@kunbus.com>" ]
-
-[dependencies]
-clap = { version = "3.1", features = ["derive"] }
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.1", features = ["serde"] }
-md5 = { version = "0.7" }
-eui48 = { version = "1.1", features = ["serde"] }
-num = "0.4"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-anyhow = { version = "1.0"}
-thiserror = { version = "1.0" }
+[workspace]
+members = ["revpi-eep"]
