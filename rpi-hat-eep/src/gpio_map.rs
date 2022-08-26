@@ -3,11 +3,11 @@
 
 const MAX_GPIOS: usize = 28;
 
-use crate::ToBuffer;
+use crate::ToBytes;
 
 /// 0=leave at default, 1-8=drive*2mA, 9-15=reserved
 #[derive(Clone, Copy, Debug)]
-enum GpioDrive {
+pub enum GpioDrive {
     Default = 0,
     Drive2mA = 1,
     Drive4mA = 2,
@@ -21,7 +21,7 @@ enum GpioDrive {
 
 /// 0=leave at default, 1=slew rate limiting, 2=no slew limiting, 3=reserved
 #[derive(Clone, Copy, Debug)]
-enum GpioSlew {
+pub enum GpioSlew {
     /// leave at default
     Default = 0,
     /// slew rate limiting
@@ -32,7 +32,7 @@ enum GpioSlew {
 
 /// 0=leave at default, 1=hysteresis disabled, 2=hysteresis enabled, 3=reserved
 #[derive(Clone, Copy, Debug)]
-enum GpioHysteresis {
+pub enum GpioHysteresis {
     /// leave at default
     Default = 0,
     /// hysteresis disabled
@@ -50,7 +50,7 @@ enum GpioHysteresis {
 /// If back_power=2 high current USB mode is automatically enabled.
 /// ```
 #[derive(Clone, Copy, Debug)]
-enum GpioBackPower {
+pub enum GpioBackPower {
     /// board does not back power Pi
     None = 0,
     /// board back powers and can supply up to 1.3A to the Pi
@@ -73,7 +73,7 @@ enum GpioBackPower {
 /// 010 = GPIO Pin n takes alternate function 5
 /// ```
 #[derive(Clone, Copy, Debug)]
-enum GpioFsel {
+pub enum GpioFsel {
     /// GPIO Pin is an input
     Input = 0,
     /// GPIO Pin is an output
@@ -94,7 +94,7 @@ enum GpioFsel {
 
 /// 0=leave at default setting,  1=pullup, 2=pulldown, 3=no pull
 #[derive(Clone, Copy, Debug)]
-enum GpioPull {
+pub enum GpioPull {
     /// leave at default setting
     Default = 0,
     /// pullup
@@ -102,23 +102,19 @@ enum GpioPull {
     /// pulldown
     Down = 2,
     /// no pull
-    None = 3,
+    NoPull = 3,
 }
 
 #[derive(Debug)]
-struct GpioPin {
+pub struct GpioPin {
     fsel: GpioFsel,
     pull: GpioPull,
     used: bool,
 }
 
 impl GpioPin {
-    fn new() -> GpioPin {
-        GpioPin {
-            fsel: GpioFsel::Input,
-            pull: GpioPull::None,
-            used: false,
-        }
+    pub fn new(fsel: GpioFsel, pull: GpioPull, used: bool) -> GpioPin {
+        GpioPin { fsel, pull, used }
     }
 
     fn to_buffer(&self) -> u8 {
@@ -161,12 +157,36 @@ pub struct EEPAtomGpioMapData {
     gpios: Vec<GpioPin>,
 }
 
-impl ToBuffer for EEPAtomGpioMapData {
+impl EEPAtomGpioMapData {
+    pub fn new(
+        drive: GpioDrive,
+        slew: GpioSlew,
+        hysteresis: GpioHysteresis,
+        back_power: GpioBackPower,
+    ) -> EEPAtomGpioMapData {
+        EEPAtomGpioMapData {
+            drive,
+            slew,
+            hysteresis,
+            back_power,
+            gpios: Vec::with_capacity(MAX_GPIOS),
+        }
+    }
+
+    pub fn push(&mut self, gpio: GpioPin) {
+        if self.gpios.len() >= MAX_GPIOS {
+            panic!("gpios > MAX_GPIOS (28)");
+        }
+        self.gpios.push(gpio);
+    }
+}
+
+impl ToBytes for EEPAtomGpioMapData {
     fn len(&self) -> usize {
         1 + 1 + 28
     }
 
-    fn to_buffer(&self, buf: &mut Vec<u8>) -> () {
+    fn to_bytes(&self, buf: &mut Vec<u8>) {
         let drive = self.drive as u8;
         let slew = self.slew as u8;
         let hyst = self.hysteresis as u8;
@@ -184,17 +204,14 @@ impl ToBuffer for EEPAtomGpioMapData {
 
 #[test]
 fn test_eep_atom_gpio_map() {
-    let mut gpios: Vec<GpioPin> = Vec::with_capacity(MAX_GPIOS);
+    let mut gpio_map = EEPAtomGpioMapData::new(
+        GpioDrive::Drive8mA,
+        GpioSlew::Default,
+        GpioHysteresis::Default,
+        GpioBackPower::None,
+    );
     for _ in 0..MAX_GPIOS {
-        gpios.push(GpioPin::new());
+        gpio_map.push(GpioPin::new(GpioFsel::Input, GpioPull::Default, false));
     }
-    println!("{:?}", gpios);
-
-    let map = EEPAtomGpioMapData {
-        drive: GpioDrive::Drive8mA,
-        slew: GpioSlew::Default,
-        hysteresis: GpioHysteresis::Default,
-        back_power: GpioBackPower::None,
-        gpios,
-    };
+    println!("{:?}", gpio_map);
 }
