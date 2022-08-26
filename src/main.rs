@@ -5,14 +5,14 @@ use chrono::NaiveDate;
 use clap::Parser;
 use eui48::MacAddress;
 use std::error::Error;
-use std::path::PathBuf;
 use std::fs::File;
+use std::path::PathBuf;
 use std::process;
 use thiserror::Error;
 
 mod gpio;
-mod validate;
 mod revpi_hat_eeprom;
+mod validate;
 
 #[derive(Error, Debug)]
 pub enum RevPiError {
@@ -36,8 +36,8 @@ pub enum RevPiError {
 /// assert_eq!(parse_prefixed_int("0xA"), Ok(10));
 /// ```
 fn parse_prefixed_int<T>(src: &str) -> Result<T, String>
-    where T: num::Unsigned
-        + num::Num<FromStrRadixErr = std::num::ParseIntError>
+where
+    T: num::Unsigned + num::Num<FromStrRadixErr = std::num::ParseIntError>,
 {
     let val = if src.starts_with("0b") {
         T::from_str_radix(&src[2..], 2)
@@ -50,7 +50,7 @@ fn parse_prefixed_int<T>(src: &str) -> Result<T, String>
     };
     match val {
         Ok(val) => Ok(val),
-        Err(e) => Err(format!("{e}"))
+        Err(e) => Err(format!("{e}")),
     }
 }
 
@@ -68,8 +68,14 @@ fn test_parse_prefixed_int() {
     assert_eq!(parse_prefixed_int("0xffff"), Ok(u16::MAX));
     assert_eq!(parse_prefixed_int("0xffffffff"), Ok(u32::MAX));
     assert_eq!(parse_prefixed_int("0xffffffffffffffff"), Ok(u64::MAX));
-    assert_eq!(parse_prefixed_int::<u16>("0x10000"), Err("number too large to fit in target type".to_string()));
-    assert_eq!(parse_prefixed_int::<u16>("-1"), Err("invalid digit found in string".to_string()));
+    assert_eq!(
+        parse_prefixed_int::<u16>("0x10000"),
+        Err("number too large to fit in target type".to_string())
+    );
+    assert_eq!(
+        parse_prefixed_int::<u16>("-1"),
+        Err("invalid digit found in string".to_string())
+    );
 }
 
 /// Parse and validate a string for a date of the format YYYY-MM-DD (ISO8601/RFC3339).
@@ -81,22 +87,36 @@ fn test_parse_prefixed_int() {
 /// ```
 /// assert_eq!(parse_date_iso8601("2022-03-15"), Ok(chrono::NaiveDate::from_ymd(2022, 3, 15)));
 /// ```
-fn parse_date_iso8601(src: &str) -> Result<chrono::NaiveDate, String>
-{
+fn parse_date_iso8601(src: &str) -> Result<chrono::NaiveDate, String> {
     let date = NaiveDate::parse_from_str(src, "%F");
     match date {
         Ok(date) => Ok(date),
-        Err(e) => Err(format!("{e}"))
+        Err(e) => Err(format!("{e}")),
     }
 }
 
 #[test]
 fn test_parse_date_rfc3339() {
-    assert_eq!(parse_date_iso8601("2022-03-15"), Ok(NaiveDate::from_ymd(2022, 3, 15)));
-    assert_eq!(parse_date_iso8601("2022-3-15"), Ok(NaiveDate::from_ymd(2022, 3, 15)));
-    assert_eq!(parse_date_iso8601("2O22-03-15"), Err("input contains invalid characters".to_string()));
-    assert_eq!(parse_date_iso8601("2022-030-15"), Err("input contains invalid characters".to_string()));
-    assert_eq!(parse_date_iso8601("2022-13-15"), Err("input is out of range".to_string()));
+    assert_eq!(
+        parse_date_iso8601("2022-03-15"),
+        Ok(NaiveDate::from_ymd(2022, 3, 15))
+    );
+    assert_eq!(
+        parse_date_iso8601("2022-3-15"),
+        Ok(NaiveDate::from_ymd(2022, 3, 15))
+    );
+    assert_eq!(
+        parse_date_iso8601("2O22-03-15"),
+        Err("input contains invalid characters".to_string())
+    );
+    assert_eq!(
+        parse_date_iso8601("2022-030-15"),
+        Err("input contains invalid characters".to_string())
+    );
+    assert_eq!(
+        parse_date_iso8601("2022-13-15"),
+        Err("input is out of range".to_string())
+    );
 }
 
 #[derive(Parser)]
@@ -125,8 +145,10 @@ fn main() {
     let config = match std::fs::read_to_string(&cli.config) {
         Ok(config) => config,
         Err(e) => {
-            eprintln!("ERROR: Can't read config file `{}': {e}",
-                      cli.config.to_string_lossy());
+            eprintln!(
+                "ERROR: Can't read config file `{}': {e}",
+                cli.config.to_string_lossy()
+            );
             process::exit(1)
         }
     };
@@ -134,8 +156,11 @@ fn main() {
     let config = match revpi_hat_eeprom::parse_config(&config) {
         Ok(config) => config,
         Err(e) => {
-            eprintln!("ERROR: Invalid config file `{}': {e}: {}",
-                cli.config.to_string_lossy(), e.source().unwrap());
+            eprintln!(
+                "ERROR: Invalid config file `{}': {e}: {}",
+                cli.config.to_string_lossy(),
+                e.source().unwrap()
+            );
             process::exit(1);
         }
     };
@@ -151,15 +176,17 @@ fn main() {
     let _outfile = match File::create(&cli.outfile) {
         Ok(outfile) => outfile,
         Err(e) => {
-            eprintln!("ERROR: Can't create file `{}`: {e}",
-                      cli.outfile.to_string_lossy());
+            eprintln!(
+                "ERROR: Can't create file `{}`: {e}",
+                cli.outfile.to_string_lossy()
+            );
             process::exit(1)
         }
     };
 
     let edate = match cli.edate {
         Some(edate) => edate,
-        None => chrono::Local::today().naive_local()
+        None => chrono::Local::today().naive_local(),
     };
 
     let uuid = {
