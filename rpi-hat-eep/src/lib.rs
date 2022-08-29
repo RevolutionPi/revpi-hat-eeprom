@@ -271,6 +271,12 @@ pub struct EEPAtomVendorData {
     pub pstr: String,
 }
 
+impl EEPAtomVendorData {
+    pub fn new(uuid: uuid::Uuid, pid: u16, pver: u16, vstr: String, pstr: String) -> Result<EEPAtomVendorData, ()> {
+        Ok(EEPAtomVendorData { uuid, pid, pver, vstr, pstr})
+    }
+}
+
 impl ToBytes for EEPAtomVendorData {
     fn len(&self) -> usize {
         16 + 2 + 2 + 1 + 1 + self.vstr.len() + self.pstr.len()
