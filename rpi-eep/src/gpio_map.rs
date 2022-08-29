@@ -4,9 +4,10 @@
 const MAX_GPIOS: usize = 28;
 
 use crate::ToBytes;
+use num_derive::FromPrimitive;
 
 /// 0=leave at default, 1-8=drive*2mA, 9-15=reserved
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, FromPrimitive)]
 pub enum GpioDrive {
     Default = 0,
     Drive2mA = 1,
@@ -20,7 +21,7 @@ pub enum GpioDrive {
 }
 
 /// 0=leave at default, 1=slew rate limiting, 2=no slew limiting, 3=reserved
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, FromPrimitive)]
 pub enum GpioSlew {
     /// leave at default
     Default = 0,
@@ -31,7 +32,7 @@ pub enum GpioSlew {
 }
 
 /// 0=leave at default, 1=hysteresis disabled, 2=hysteresis enabled, 3=reserved
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, FromPrimitive)]
 pub enum GpioHysteresis {
     /// leave at default
     Default = 0,
@@ -49,7 +50,7 @@ pub enum GpioHysteresis {
 /// 3=reserved
 /// If back_power=2 high current USB mode is automatically enabled.
 /// ```
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, FromPrimitive)]
 pub enum GpioBackPower {
     /// board does not back power Pi
     None = 0,
