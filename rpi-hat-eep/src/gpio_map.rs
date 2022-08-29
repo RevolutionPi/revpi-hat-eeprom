@@ -72,9 +72,10 @@ pub enum GpioBackPower {
 /// 011 = GPIO Pin n takes alternate function 4
 /// 010 = GPIO Pin n takes alternate function 5
 /// ```
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum GpioFsel {
     /// GPIO Pin is an input
+    #[default]
     Input = 0,
     /// GPIO Pin is an output
     Output = 1,
@@ -93,9 +94,10 @@ pub enum GpioFsel {
 }
 
 /// 0=leave at default setting,  1=pullup, 2=pulldown, 3=no pull
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum GpioPull {
     /// leave at default setting
+    #[default]
     Default = 0,
     /// pullup
     Up = 1,
@@ -105,7 +107,7 @@ pub enum GpioPull {
     NoPull = 3,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default, Clone)]
 pub struct GpioPin {
     fsel: GpioFsel,
     pull: GpioPull,
