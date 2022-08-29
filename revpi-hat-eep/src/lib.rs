@@ -84,7 +84,7 @@ pub struct RevPiHatEeprom {
 }
 
 pub fn parse_config(s: &str) -> Result<RevPiHatEeprom, RevPiError> {
-    serde_json::from_str(s).map_err(|error| RevPiError::from(error))
+    serde_json::from_str(s).map_err(RevPiError::from)
 }
 
 impl RevPiHatEeprom {
