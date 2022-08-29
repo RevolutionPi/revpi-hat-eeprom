@@ -9,6 +9,10 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::process;
 
+// Disable manual_strip Clippy warning.
+// In parse_prefixed_int() it is not possible to do it the suggested way.
+#[allow(clippy::manual_strip)]
+
 /// Convert a string slice to an integer, the base is determind from the prefix.
 ///
 /// The string may contain 0b (for binary), 0o (for octal), 0x (for hex) or no
