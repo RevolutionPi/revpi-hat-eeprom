@@ -7,6 +7,8 @@ use self::gpio_map::EEPAtomGpioMapData;
 
 pub mod gpio_map;
 
+#[allow(clippy::len_without_is_empty)]
+
 /// This trait is used to write the object into a byte vector
 ///
 /// All objects which implement this trait can be written to a Vec<u8>. How the object is written to
