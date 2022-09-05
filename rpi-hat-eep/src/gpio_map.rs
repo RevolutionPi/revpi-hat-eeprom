@@ -194,7 +194,7 @@ impl ToBytes for EepAtomGpioMapData {
         let drive = self.drive as u8;
         let slew = self.slew as u8;
         let hyst = self.hysteresis as u8;
-        let bank_drive = (drive & 0x0f) | (slew & 0x30) << 4 | (hyst & 0xc0) << 6;
+        let bank_drive = (drive & 0x0f) | (slew & 0x03) << 4 | (hyst & 0x03) << 6;
         buf.push(bank_drive);
 
         let back_power = self.back_power as u8 & 0x3;
