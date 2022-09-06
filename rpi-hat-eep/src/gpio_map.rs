@@ -232,9 +232,13 @@ fn test_eep_atom_gpio_map() {
         GpioBackPower::None,
     );
 
-    let mut buf: Vec<u8> = Vec::with_capacity(30);
+    let mut buf: Vec<u8> = Vec::new();
     gpio_map.to_bytes(&mut buf);
-    assert_eq!(buf.len(), 30);
+    /*
+     * check if the buffer has the expected size of 30 bytes
+     * 1 byte drive_bank; 1 byte power; 28 bytes gpio pins configuration
+     */
+    assert_eq!(buf.len(), 1 + 1 + 28);
     for b in buf {
         assert_eq!(b, 0);
     }
