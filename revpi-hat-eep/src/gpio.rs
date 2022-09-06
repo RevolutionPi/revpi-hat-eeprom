@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
-use crate::RevPiError;
+use crate::error::RevPiError;
 use rpi_hat_eep::gpio_map;
 use serde::{Deserialize, Serialize};
 
