@@ -15,18 +15,18 @@ use serde::{Deserialize, Serialize};
 /// [serde_json](https://docs.serde.rs/serde_json/).
 ///
 /// # Example JSON configuration
-/// ```
+/// ```json
 /// {
 ///     "version": 1,
 ///     "vstr": "KUNBUS GmbH",
-///     "pstr": "RevPi Core3+ 8GB",
-///     "pid": 302,
+///     "pstr": "RevPi ExampleDevice 8GB",
+///     "pid": 666,
 ///     "prev": 3,
-///     "pver": 120,
-///     "dtstr": "revpi-core-2022",
+///     "pver": 333,
+///     "dtstr": "revpi-example-2022",
 ///     "gpiobanks": [
 ///         {
-///             "drive": "2mA",
+///             "drive": "8mA",
 ///             "slew": "default",
 ///             "hysteresis": "enable",
 ///             "gpios": [
