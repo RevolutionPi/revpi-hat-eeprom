@@ -31,14 +31,7 @@ fn vendor_atom(config: &EEPConfig) -> EEPAtom {
         Some(pstr) => pstr.clone(),
         None => panic!("ERROR: product string missing!"),
     };
-    let data = rpi_hat_eep::EEPAtomVendorData {
-        uuid,
-        pid,
-        pver,
-        vstr,
-        pstr,
-    };
-
+    let data = rpi_hat_eep::EEPAtomVendorData::new(uuid, pid, pver, vstr, pstr).unwrap();
     EEPAtom::new_vendor_info(data)
 }
 
