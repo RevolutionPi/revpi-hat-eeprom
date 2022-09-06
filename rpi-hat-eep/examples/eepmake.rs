@@ -336,5 +336,5 @@ fn main() {
         }
     };
 
-    let _ = output_file.write(&buf);
+    let _ = output_file.write_all(&buf);
 }
