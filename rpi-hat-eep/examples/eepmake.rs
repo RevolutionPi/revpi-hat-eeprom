@@ -307,12 +307,12 @@ fn main() {
 
     if eep_config.dtb.is_some() {
         let data = rpi_hat_eep::EepAtomLinuxDTBData::new(eep_config.dtb.unwrap());
-        eep.push(EepAtom::new_linux_dtb(data));
+        eep.push(EepAtom::new_linux_dtb(data)).unwrap();
     }
 
     for data in eep_config.custom {
         let data = rpi_hat_eep::EepAtomCustomData::new(data);
-        eep.push(EepAtom::new_custom(data));
+        eep.push(EepAtom::new_custom(data)).unwrap();
     }
 
     //println!("eeplen: {}", eep.len());
@@ -336,5 +336,5 @@ fn main() {
         }
     };
 
-    let _ = output_file.write_all(&buf);
+    output_file.write_all(&buf).unwrap();
 }
