@@ -4,8 +4,12 @@
 use chrono::NaiveDate;
 use clap::Parser;
 use eui48::MacAddress;
+use revpi_hat_eep::error::RevPiError;
+use revpi_hat_eep::RevPiHatEeprom;
+use rpi_hat_eep::{gpio_map, EEPAtom, EEPAtomCustomData, ToBytes, EEP};
 use std::error::Error;
-use std::fs::File;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::PathBuf;
 use std::process;
 
@@ -106,6 +110,65 @@ fn test_parse_date_rfc3339() {
     );
 }
 
+fn calc_uuid(pid: u16, pver: u16, prev: u16, serial: u32) -> uuid::Uuid {
+    let mut bytes: Vec<u8> = Vec::with_capacity(10);
+    bytes.extend_from_slice(&u16::to_le_bytes(pid));
+    bytes.extend_from_slice(&u16::to_le_bytes(pver));
+    bytes.extend_from_slice(&u16::to_le_bytes(prev));
+    bytes.extend_from_slice(&u32::to_le_bytes(serial));
+    let digest = md5::compute(&bytes);
+    uuid::Builder::from_md5_bytes(*digest).into_uuid()
+}
+
+fn create_rpi_eep(
+    config: RevPiHatEeprom,
+    serial: u32,
+    edate: NaiveDate,
+    mac: MacAddress,
+) -> Result<rpi_hat_eep::EEP, RevPiError> {
+    let uuid = calc_uuid(config.pid, config.pver, config.prev, serial);
+    let mut eep = EEP::new();
+    let data = rpi_hat_eep::EEPAtomVendorData::new(
+        uuid,
+        config.pid,
+        config.pver,
+        config.vstr,
+        config.pstr,
+    )?;
+
+    let atom = EEPAtom::new_vendor_info(data);
+    eep.push(atom)?;
+
+    let gpio_map: gpio_map::EEPAtomGpioMapData = config.gpiobanks[0].clone().try_into().unwrap();
+    eep.push(EEPAtom::new_gpio_map(gpio_map))?;
+
+    let dtb = rpi_hat_eep::EEPAtomLinuxDTBData::new(rpi_hat_eep::LinuxDTB::Name(config.dtstr));
+    eep.push(EEPAtom::new_linux_dtb(dtb))?;
+
+    let data = EEPAtomCustomData::new(config.version.to_string().into_bytes());
+    eep.push(EEPAtom::new_custom(data))?;
+
+    let data = EEPAtomCustomData::new(serial.to_string().into_bytes());
+    eep.push(EEPAtom::new_custom(data))?;
+
+    let data = EEPAtomCustomData::new(config.prev.to_string().into_bytes());
+    eep.push(EEPAtom::new_custom(data))?;
+
+    let data = EEPAtomCustomData::new(edate.to_string().into_bytes());
+    eep.push(EEPAtom::new_custom(data))?;
+
+    let data = EEPAtomCustomData::new("0".as_bytes().to_vec());
+    eep.push(EEPAtom::new_custom(data))?;
+
+    let data = EEPAtomCustomData::new(
+        mac.to_string(eui48::MacAddressFormat::HexString)
+            .into_bytes(),
+    );
+    eep.push(EEPAtom::new_custom(data))?;
+
+    Ok(eep)
+}
+
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 pub struct Cli {
@@ -123,7 +186,7 @@ pub struct Cli {
     pub config: PathBuf,
     /// Output file name
     #[clap(value_parser, value_name = "OUTPUT", default_value = "out.eep")]
-    pub outfile: PathBuf,
+    pub outfile_name: PathBuf,
 }
 
 fn main() {
@@ -160,42 +223,40 @@ fn main() {
         }
     }
 
-    let _outfile = match File::create(&cli.outfile) {
-        Ok(outfile) => outfile,
-        Err(e) => {
-            eprintln!(
-                "ERROR: Can't create file `{}`: {e}",
-                cli.outfile.to_string_lossy()
-            );
-            process::exit(1)
-        }
-    };
-
     let edate = match cli.edate {
         Some(edate) => edate,
         None => chrono::Local::today().naive_local(),
     };
 
-    let uuid = {
-        let mut bytes: Vec<u8> = Vec::with_capacity(10);
-        bytes.extend_from_slice(&u16::to_le_bytes(config.pid));
-        bytes.extend_from_slice(&u16::to_le_bytes(config.pver));
-        bytes.extend_from_slice(&u16::to_le_bytes(config.prev));
-        bytes.extend_from_slice(&u32::to_le_bytes(cli.serial));
-        let digest = md5::compute(&bytes);
-        uuid::Builder::from_md5_bytes(*digest).into_uuid()
+    let eep = create_rpi_eep(config, cli.serial, edate, cli.mac).unwrap();
+    let mut buf: Vec<u8> = Vec::new();
+    eep.to_bytes(&mut buf);
+
+    let mut output_file = match OpenOptions::new()
+        .read(false)
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open(&cli.outfile_name)
+    {
+        Ok(file) => file,
+        Err(e) => {
+            eprintln!(
+                "ERROR: Can't open output file: `{}': {e}",
+                cli.outfile_name.to_string_lossy()
+            );
+            process::exit(-1);
+        }
     };
 
-    println!("PID:    {:}", config.pid);
-    println!("PVER:   {:} ({})", config.pver, config.pver as f32 / 100.0);
-    println!("PREV:   {:02}", config.prev);
-    println!("VSTR:   {}", config.vstr);
-    println!("PSTR:   {}", config.pstr);
-    println!("DTSTR:  {}", config.dtstr);
-    println!("SERIAL: {}", cli.serial);
-    println!("EDATE:  {}", edate);
-    println!("MAC:    {}", cli.mac);
-    println!("UUID:   {}", uuid);
-
-    println!("\nPR#:    PR1{:05}R{:02}", config.pid, config.prev);
+    match output_file.write_all(&buf) {
+        Ok(x) => x,
+        Err(e) => {
+            eprintln!(
+                "ERROR: Can't write data to the output file: `{}': {e}",
+                cli.outfile_name.to_string_lossy()
+            );
+            process::exit(-1);
+        }
+    }
 }
