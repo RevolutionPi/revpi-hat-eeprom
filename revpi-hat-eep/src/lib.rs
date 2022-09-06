@@ -2,22 +2,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
 pub mod gpio;
+pub mod error;
 
 use self::gpio::GpioBank;
+use self::error::RevPiError;
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
-
-#[derive(Error, Debug)]
-pub enum RevPiError {
-    #[error("JSON parse error")]
-    JsonError(#[from] serde_json::Error),
-    #[error("Config validation error")]
-    Error(String),
-    #[error("Validation error")]
-    ValidationError(String),
-    #[error("unknown error")]
-    Unknown,
-}
 
 /// This struct describs the RevPi HAT EEPROM configuration
 ///
