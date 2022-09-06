@@ -127,6 +127,23 @@ impl GpioPin {
     }
 }
 
+#[test]
+fn test_gpio_pin() {
+    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Default, false).to_u8(), 0x00_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Output, GpioPull::Default, false).to_u8(), 0x01_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Alt0, GpioPull::Default, false).to_u8(), 0x04_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Alt1, GpioPull::Default, false).to_u8(), 0x05_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Alt2, GpioPull::Default, false).to_u8(), 0x06_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Alt3, GpioPull::Default, false).to_u8(), 0x07_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Alt4, GpioPull::Default, false).to_u8(), 0x03_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Alt5, GpioPull::Default, false).to_u8(), 0x02_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Up, false).to_u8(), 0x20_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Down, false).to_u8(), 0x40_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::NoPull, false).to_u8(), 0x60_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Default, true).to_u8(), 0x80_u8);
+    assert_eq!(GpioPin::new(GpioFsel::Alt3, GpioPull::NoPull, true).to_u8(), 0xe7_u8);
+}
+
 /// This struct implements the GPIO map Atom
 ///
 /// [GPIO map atom data](https://github.com/raspberrypi/hats/blob/9616b5cd2bdf3e1d2d0330611387d639c1916100/eeprom-format.md#gpio-map-atom-data-type0x0002):
