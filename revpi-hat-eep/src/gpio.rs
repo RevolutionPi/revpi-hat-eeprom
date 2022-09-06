@@ -4,6 +4,7 @@
 use crate::error::RevPiError;
 use rpi_hat_eep::gpio_map;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 const MAX_GPIOS: usize = 28;
 
@@ -278,5 +279,11 @@ impl GpioBank {
             configured_gpios[gpio.gpio as usize] = true;
         }
         Ok(())
+    }
+}
+
+impl Display for GpioBank {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
