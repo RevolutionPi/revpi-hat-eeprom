@@ -232,7 +232,7 @@ fn test_eep_atom_gpio_map() {
         GpioBackPower::None,
     );
     for _ in 0..MAX_GPIOS {
-        gpio_map.push(GpioPin::new(GpioFsel::Input, GpioPull::Default, false));
+        gpio_map.push(GpioPin::new(GpioFsel::Input, GpioPull::Default, false)).unwrap();
     }
     println!("{:?}", gpio_map);
 }
