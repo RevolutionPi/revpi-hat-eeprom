@@ -263,15 +263,15 @@ impl ToBytes for EEPAtom {
 #[derive(Debug)]
 pub struct EEPAtomVendorData {
     /// UUID (unique for every single board ever made)
-    pub uuid: uuid::Uuid,
+    uuid: uuid::Uuid,
     /// product ID
-    pub pid: u16,
+    pid: u16,
     /// product version
-    pub pver: u16,
+    pver: u16,
     /// ASCII vendor string e.g. "ACME Technology Company"
-    pub vstr: String,
+    vstr: String,
     /// ASCII product string e.g. "Special Sensor Board"
-    pub pstr: String,
+    pstr: String,
 }
 
 impl EEPAtomVendorData {
