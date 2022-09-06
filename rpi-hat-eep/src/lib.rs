@@ -292,7 +292,7 @@ impl EEPAtomVendorData {
         if pstr.len() > u8::MAX.into() {
             return Err(format!(
                 "Product string to long: {} (max: {} bytes)",
-                vstr.len(),
+                pstr.len(),
                 u8::MAX
             ));
         }
