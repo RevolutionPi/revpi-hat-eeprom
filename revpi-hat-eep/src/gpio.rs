@@ -238,12 +238,6 @@ pub struct GpioPin {
     pull: GpioPull,
 }
 
-impl From<GpioPin> for gpio_map::GpioPin {
-    fn from(gpio: GpioPin) -> Self {
-        gpio_map::GpioPin::new(gpio.fsel.into(), gpio.pull.into(), false)
-    }
-}
-
 /// This struct represents the GPIO configuration the the HAT EEPROM
 ///
 /// This struct is used to deserialize the GPIO configuration from a RevPi HAT
