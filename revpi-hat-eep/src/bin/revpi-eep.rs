@@ -4,6 +4,9 @@
 use chrono::NaiveDate;
 use clap::Parser;
 use eui48::MacAddress;
+use revpi_hat_eep::error::RevPiError;
+use revpi_hat_eep::RevPiHatEeprom;
+use rpi_hat_eep::{gpio_map, EepAtom, EepAtomCustomData, ToBytes, Eep};
 use std::error::Error;
 use std::fs::File;
 use std::path::PathBuf;
@@ -106,6 +109,62 @@ fn test_parse_date_rfc3339() {
     );
 }
 
+fn calc_uuid(pid: u16, pver: u16, prev: u16, serial: u32) -> uuid::Uuid {
+    let mut bytes: Vec<u8> = Vec::with_capacity(10);
+    bytes.extend_from_slice(&u16::to_le_bytes(pid));
+    bytes.extend_from_slice(&u16::to_le_bytes(pver));
+    bytes.extend_from_slice(&u16::to_le_bytes(prev));
+    bytes.extend_from_slice(&u32::to_le_bytes(serial));
+    let digest = md5::compute(&bytes);
+    uuid::Builder::from_md5_bytes(*digest).into_uuid()
+}
+
+fn create_rpi_eep(
+    config: RevPiHatEeprom,
+    serial: u32,
+    edate: NaiveDate,
+    mac: MacAddress,
+) -> Result<rpi_hat_eep::Eep, RevPiError> {
+    let uuid = calc_uuid(config.pid, config.pver, config.prev, serial);
+    let vendor_data = rpi_hat_eep::EepAtomVendorData::new(
+        uuid,
+        config.pid,
+        config.pver,
+        config.vstr,
+        config.pstr,
+    )?;
+
+    let gpio_map: gpio_map::EepAtomGpioMapData = config.gpiobanks[0].clone().try_into()?;
+
+    let mut eep = Eep::new(vendor_data, gpio_map);
+
+    let dtb = rpi_hat_eep::EepAtomLinuxDTBData::new(rpi_hat_eep::LinuxDTB::Name(config.dtstr));
+    eep.push(EepAtom::new_linux_dtb(dtb))?;
+
+    let data = EepAtomCustomData::new(config.version.to_string().into_bytes());
+    eep.push(EepAtom::new_custom(data))?;
+
+    let data = EepAtomCustomData::new(serial.to_string().into_bytes());
+    eep.push(EepAtom::new_custom(data))?;
+
+    let data = EepAtomCustomData::new(config.prev.to_string().into_bytes());
+    eep.push(EepAtom::new_custom(data))?;
+
+    let data = EepAtomCustomData::new(edate.to_string().into_bytes());
+    eep.push(EepAtom::new_custom(data))?;
+
+    let data = EepAtomCustomData::new("0".as_bytes().to_vec());
+    eep.push(EepAtom::new_custom(data))?;
+
+    let data = EepAtomCustomData::new(
+        mac.to_string(eui48::MacAddressFormat::HexString)
+            .into_bytes(),
+    );
+    eep.push(EepAtom::new_custom(data))?;
+
+    Ok(eep)
+}
+
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 pub struct Cli {
@@ -176,26 +235,5 @@ fn main() {
         None => chrono::Local::today().naive_local(),
     };
 
-    let uuid = {
-        let mut bytes: Vec<u8> = Vec::with_capacity(10);
-        bytes.extend_from_slice(&u16::to_le_bytes(config.pid));
-        bytes.extend_from_slice(&u16::to_le_bytes(config.pver));
-        bytes.extend_from_slice(&u16::to_le_bytes(config.prev));
-        bytes.extend_from_slice(&u32::to_le_bytes(cli.serial));
-        let digest = md5::compute(&bytes);
-        uuid::Builder::from_md5_bytes(*digest).into_uuid()
-    };
-
-    println!("PID:    {:}", config.pid);
-    println!("PVER:   {:} ({})", config.pver, config.pver as f32 / 100.0);
-    println!("PREV:   {:02}", config.prev);
-    println!("VSTR:   {}", config.vstr);
-    println!("PSTR:   {}", config.pstr);
-    println!("DTSTR:  {}", config.dtstr);
-    println!("SERIAL: {}", cli.serial);
-    println!("EDATE:  {}", edate);
-    println!("MAC:    {}", cli.mac);
-    println!("UUID:   {}", uuid);
-
-    println!("\nPR#:    PR1{:05}R{:02}", config.pid, config.prev);
+    let eep = create_rpi_eep(config, cli.serial, edate, cli.mac).unwrap();
 }
