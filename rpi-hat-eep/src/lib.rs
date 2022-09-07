@@ -329,16 +329,36 @@ impl ToBytes for EepAtomVendorData {
 
 #[test]
 fn test_eep_atom_vendor_data() {
-    let data = EepAtomVendorData {
-        uuid: uuid::uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
-        pid: 123u16,
-        pver: 3u16,
-        vstr: "ACME Technology Company".to_string(),
-        pstr: "Special Sensor Board".to_string(),
-    };
+    let uuid = uuid::uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8");
+    let data = EepAtomVendorData::new(
+        uuid,
+        123u16,
+        3u16,
+        "ACME Technology Company".to_string(),
+        "Special Sensor Board".to_string(),
+    ).unwrap();
     let mut buf: Vec<u8> = Vec::new();
     data.to_bytes(&mut buf);
-    assert_eq!(data.len(), buf.len())
+    assert_eq!(data.len(), buf.len());
+
+    let long_string: String = vec!['a'; 256].into_iter().collect();
+    let data = EepAtomVendorData::new(
+        uuid,
+        123u16,
+        3u16,
+        long_string.clone(),
+        "Special Sensor Board".to_string(),
+    );
+    assert!(data.is_err());
+
+    let data = EepAtomVendorData::new(
+        uuid,
+        123u16,
+        3u16,
+        "ACME Technology Company".to_string(),
+        long_string,
+    );
+    assert!(data.is_err());
 }
 
 #[derive(Debug)]
