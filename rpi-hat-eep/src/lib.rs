@@ -3,7 +3,7 @@
 
 use crc::{Crc, CRC_16_ARC};
 
-use self::gpio_map::EEPAtomGpioMapData;
+use self::gpio_map::EepAtomGpioMapData;
 
 pub mod gpio_map;
 
@@ -42,35 +42,35 @@ pub trait ToBytes {
 /// ```
 /// The HEADER is not part of this struct as it is generated on demand.
 #[derive(Debug)]
-pub struct EEP {
+pub struct Eep {
     /// This vector contains the ATOMs (ATOM1...ATOMn)
-    atoms: Vec<EEPAtom>,
+    atoms: Vec<EepAtom>,
 }
 
-impl EEP {
-    pub fn new() -> EEP {
-        let atoms: Vec<EEPAtom> = Vec::new();
-        EEP { atoms }
+impl Eep {
+    pub fn new() -> Eep {
+        let atoms: Vec<EepAtom> = Vec::new();
+        Eep { atoms }
     }
 
-    pub fn push(&mut self, mut atom: EEPAtom) -> Result<(), String> {
+    pub fn push(&mut self, mut atom: EepAtom) -> Result<(), String> {
         match atom.atype {
-            EEPAtomType::VendorInfo => {
+            EepAtomType::VendorInfo => {
                 if !self.atoms.is_empty() {
                     return Err("Wrong order: vendor info".to_string());
                 }
             }
-            EEPAtomType::GpioMap => {
+            EepAtomType::GpioMap => {
                 if self.atoms.len() != 1 {
                     return Err("Wrong order: gpio map".to_string());
                 }
             }
-            EEPAtomType::LinuxDTB => {
+            EepAtomType::LinuxDTB => {
                 if self.atoms.len() != 2 {
                     return Err("Wrong order: dtb".to_string());
                 }
             }
-            EEPAtomType::ManufCustomData => {
+            EepAtomType::ManufCustomData => {
                 if self.atoms.len() < 2 {
                     return Err("Wrong order: custom".to_string());
                 }
@@ -82,7 +82,7 @@ impl EEP {
     }
 }
 
-impl ToBytes for EEP {
+impl ToBytes for Eep {
     fn len(&self) -> usize {
         let mut len = 4 + 1 + 1 + 2 + 4;
         for atom in &self.atoms {
@@ -108,39 +108,39 @@ impl ToBytes for EEP {
     }
 }
 
-impl Default for EEP {
+impl Default for Eep {
     fn default() -> Self {
-        EEP::new()
+        Eep::new()
     }
 }
 
 #[derive(Debug)]
-pub enum EEPAtomData {
-    /// vendor info (0x0001, [`EEPAtomType::VendorInfo`])
-    VendorInfo(EEPAtomVendorData),
-    /// GPIO map (0x0002, [`EEPAtomType::GpioMap`])
-    GpioMap(gpio_map::EEPAtomGpioMapData),
-    /// Linux device tree blob (0x0003, [`EEPAtomType::LinuxDTB`])
-    LinuxDTB(EEPAtomLinuxDTBData),
-    /// manufacturer custom data (0x0004, [`EEPAtomType::ManufCustomData`])
-    ManufCustomData(EEPAtomCustomData),
+pub enum EepAtomData {
+    /// vendor info (0x0001, [`EepAtomType::VendorInfo`])
+    VendorInfo(EepAtomVendorData),
+    /// GPIO map (0x0002, [`EepAtomType::GpioMap`])
+    GpioMap(gpio_map::EepAtomGpioMapData),
+    /// Linux device tree blob (0x0003, [`EepAtomType::LinuxDTB`])
+    LinuxDTB(EepAtomLinuxDTBData),
+    /// manufacturer custom data (0x0004, [`EepAtomType::ManufCustomData`])
+    ManufCustomData(EepAtomCustomData),
 }
 
-impl ToBytes for EEPAtomData {
+impl ToBytes for EepAtomData {
     fn len(&self) -> usize {
         match self {
-            EEPAtomData::VendorInfo(data) => data.len(),
-            EEPAtomData::GpioMap(data) => data.len(),
-            EEPAtomData::LinuxDTB(data) => data.len(),
-            EEPAtomData::ManufCustomData(data) => data.len(),
+            EepAtomData::VendorInfo(data) => data.len(),
+            EepAtomData::GpioMap(data) => data.len(),
+            EepAtomData::LinuxDTB(data) => data.len(),
+            EepAtomData::ManufCustomData(data) => data.len(),
         }
     }
     fn to_bytes(&self, buf: &mut Vec<u8>) {
         match self {
-            EEPAtomData::VendorInfo(data) => data.to_bytes(buf),
-            EEPAtomData::GpioMap(data) => data.to_bytes(buf),
-            EEPAtomData::LinuxDTB(data) => data.to_bytes(buf),
-            EEPAtomData::ManufCustomData(data) => data.to_bytes(buf),
+            EepAtomData::VendorInfo(data) => data.to_bytes(buf),
+            EepAtomData::GpioMap(data) => data.to_bytes(buf),
+            EepAtomData::LinuxDTB(data) => data.to_bytes(buf),
+            EepAtomData::ManufCustomData(data) => data.to_bytes(buf),
         };
     }
 }
@@ -161,7 +161,7 @@ impl ToBytes for EEPAtomData {
 /// enum is treated as an invalid/error.
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
-pub enum EEPAtomType {
+pub enum EepAtomType {
     VendorInfo = 0x0001,
     GpioMap = 0x0002,
     LinuxDTB = 0x0003,
@@ -181,53 +181,53 @@ pub enum EEPAtomType {
 /// ```
 /// The dlen and crc16 are not stored in this struct as they are generated on demand.
 #[derive(Debug)]
-pub struct EEPAtom {
-    /// The Atom Type as defined by [`EEPAtomType`]
-    atype: EEPAtomType,
-    /// The atom count (ATOM1...ATOMn). It is the same as the index of the Atom in the [`EEP`] atoms vector +1
+pub struct EepAtom {
+    /// The Atom Type as defined by [`EepAtomType`]
+    atype: EepAtomType,
+    /// The atom count (ATOM1...ATOMn). It is the same as the index of the Atom in the [`Eep`] atoms vector +1
     count: u16,
     /// The actual Atom data
-    data: EEPAtomData,
+    data: EepAtomData,
 }
 
 /// This defines the CRC16 algorithm used to calculate the checksum of the Atoms
 const ATOM_CRC16: Crc<u16> = Crc::<u16>::new(&CRC_16_ARC);
 
-impl EEPAtom {
-    pub fn new_vendor_info(data: EEPAtomVendorData) -> EEPAtom {
-        EEPAtom {
-            atype: EEPAtomType::VendorInfo,
+impl EepAtom {
+    pub fn new_vendor_info(data: EepAtomVendorData) -> EepAtom {
+        EepAtom {
+            atype: EepAtomType::VendorInfo,
             count: 0xffff,
-            data: EEPAtomData::VendorInfo(data),
+            data: EepAtomData::VendorInfo(data),
         }
     }
 
-    pub fn new_gpio_map(data: EEPAtomGpioMapData) -> EEPAtom {
-        EEPAtom {
-            atype: EEPAtomType::GpioMap,
+    pub fn new_gpio_map(data: EepAtomGpioMapData) -> EepAtom {
+        EepAtom {
+            atype: EepAtomType::GpioMap,
             count: 0xffff,
-            data: EEPAtomData::GpioMap(data),
+            data: EepAtomData::GpioMap(data),
         }
     }
 
-    pub fn new_linux_dtb(data: EEPAtomLinuxDTBData) -> EEPAtom {
-        EEPAtom {
-            atype: EEPAtomType::LinuxDTB,
+    pub fn new_linux_dtb(data: EepAtomLinuxDTBData) -> EepAtom {
+        EepAtom {
+            atype: EepAtomType::LinuxDTB,
             count: 0xffff,
-            data: EEPAtomData::LinuxDTB(data),
+            data: EepAtomData::LinuxDTB(data),
         }
     }
 
-    pub fn new_custom(data: EEPAtomCustomData) -> EEPAtom {
-        EEPAtom {
-            atype: EEPAtomType::ManufCustomData,
+    pub fn new_custom(data: EepAtomCustomData) -> EepAtom {
+        EepAtom {
+            atype: EepAtomType::ManufCustomData,
             count: 0xffff,
-            data: EEPAtomData::ManufCustomData(data),
+            data: EepAtomData::ManufCustomData(data),
         }
     }
 }
 
-impl ToBytes for EEPAtom {
+impl ToBytes for EepAtom {
     fn len(&self) -> usize {
         2 + 2 + 4 + self.data.len() + 2
     }
@@ -261,7 +261,7 @@ impl ToBytes for EEPAtom {
 /// ```
 /// The vslen and the pslen are implicitly given by the [`String`] type.
 #[derive(Debug)]
-pub struct EEPAtomVendorData {
+pub struct EepAtomVendorData {
     /// UUID (unique for every single board ever made)
     pub uuid: uuid::Uuid,
     /// product ID
@@ -274,14 +274,14 @@ pub struct EEPAtomVendorData {
     pub pstr: String,
 }
 
-impl EEPAtomVendorData {
+impl EepAtomVendorData {
     pub fn new(
         uuid: uuid::Uuid,
         pid: u16,
         pver: u16,
         vstr: String,
         pstr: String,
-    ) -> Result<EEPAtomVendorData, String> {
+    ) -> Result<EepAtomVendorData, String> {
         if vstr.len() > u8::MAX.into() {
             return Err(format!(
                 "Vendor string to long: {} (max: {} bytes)",
@@ -296,7 +296,7 @@ impl EEPAtomVendorData {
                 u8::MAX
             ));
         }
-        Ok(EEPAtomVendorData {
+        Ok(EepAtomVendorData {
             uuid,
             pid,
             pver,
@@ -306,7 +306,7 @@ impl EEPAtomVendorData {
     }
 }
 
-impl ToBytes for EEPAtomVendorData {
+impl ToBytes for EepAtomVendorData {
     fn len(&self) -> usize {
         16 + 2 + 2 + 1 + 1 + self.vstr.len() + self.pstr.len()
     }
@@ -318,9 +318,9 @@ impl ToBytes for EEPAtomVendorData {
         }
         buf.extend_from_slice(&self.pid.to_le_bytes());
         buf.extend_from_slice(&self.pver.to_le_bytes());
-        // vstr.len() can't be > u8::MAX (see: EEPAtomVendorData::new()
+        // vstr.len() can't be > u8::MAX (see: EepAtomVendorData::new()
         buf.push(u8::try_from(self.vstr.len()).unwrap());
-        // pstr.len() can't be > u8::MAX (see: EEPAtomVendorData::new())
+        // pstr.len() can't be > u8::MAX (see: EepAtomVendorData::new())
         buf.push(u8::try_from(self.pstr.len()).unwrap());
         buf.extend_from_slice(self.vstr.as_bytes());
         buf.extend_from_slice(self.pstr.as_bytes());
@@ -329,7 +329,7 @@ impl ToBytes for EEPAtomVendorData {
 
 #[test]
 fn test_eep_atom_vendor_data() {
-    let data = EEPAtomVendorData {
+    let data = EepAtomVendorData {
         uuid: uuid::uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
         pid: 123u16,
         pver: 3u16,
@@ -348,17 +348,17 @@ pub enum LinuxDTB {
 }
 
 #[derive(Debug)]
-pub struct EEPAtomLinuxDTBData {
+pub struct EepAtomLinuxDTBData {
     data: LinuxDTB,
 }
 
-impl EEPAtomLinuxDTBData {
-    pub fn new(data: LinuxDTB) -> EEPAtomLinuxDTBData {
-        EEPAtomLinuxDTBData { data }
+impl EepAtomLinuxDTBData {
+    pub fn new(data: LinuxDTB) -> EepAtomLinuxDTBData {
+        EepAtomLinuxDTBData { data }
     }
 }
 
-impl ToBytes for EEPAtomLinuxDTBData {
+impl ToBytes for EepAtomLinuxDTBData {
     fn len(&self) -> usize {
         match &self.data {
             LinuxDTB::Blob(data) => data.len(),
@@ -375,17 +375,17 @@ impl ToBytes for EEPAtomLinuxDTBData {
 }
 
 #[derive(Debug)]
-pub struct EEPAtomCustomData {
+pub struct EepAtomCustomData {
     data: Vec<u8>,
 }
 
-impl EEPAtomCustomData {
-    pub fn new(data: Vec<u8>) -> EEPAtomCustomData {
-        EEPAtomCustomData { data }
+impl EepAtomCustomData {
+    pub fn new(data: Vec<u8>) -> EepAtomCustomData {
+        EepAtomCustomData { data }
     }
 }
 
-impl ToBytes for EEPAtomCustomData {
+impl ToBytes for EepAtomCustomData {
     fn len(&self) -> usize {
         self.data.len()
     }

@@ -152,7 +152,7 @@ impl GpioPin {
 ///           [  7] is_used     1=board uses this pin, 0=not connected and therefore not used
 /// ```
 #[derive(Debug)]
-pub struct EEPAtomGpioMapData {
+pub struct EepAtomGpioMapData {
     drive: GpioDrive,
     slew: GpioSlew,
     hysteresis: GpioHysteresis,
@@ -160,14 +160,14 @@ pub struct EEPAtomGpioMapData {
     gpios: Vec<GpioPin>,
 }
 
-impl EEPAtomGpioMapData {
+impl EepAtomGpioMapData {
     pub fn new(
         drive: GpioDrive,
         slew: GpioSlew,
         hysteresis: GpioHysteresis,
         back_power: GpioBackPower,
-    ) -> EEPAtomGpioMapData {
-        EEPAtomGpioMapData {
+    ) -> EepAtomGpioMapData {
+        EepAtomGpioMapData {
             drive,
             slew,
             hysteresis,
@@ -185,7 +185,7 @@ impl EEPAtomGpioMapData {
     }
 }
 
-impl ToBytes for EEPAtomGpioMapData {
+impl ToBytes for EepAtomGpioMapData {
     fn len(&self) -> usize {
         1 + 1 + 28
     }
@@ -208,7 +208,7 @@ impl ToBytes for EEPAtomGpioMapData {
 
 #[test]
 fn test_eep_atom_gpio_map() {
-    let mut gpio_map = EEPAtomGpioMapData::new(
+    let mut gpio_map = EepAtomGpioMapData::new(
         GpioDrive::Drive8mA,
         GpioSlew::Default,
         GpioHysteresis::Default,

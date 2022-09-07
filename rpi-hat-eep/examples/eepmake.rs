@@ -4,7 +4,7 @@
 extern crate rpi_hat_eep;
 
 use rpi_hat_eep::{gpio_map, ToBytes};
-use rpi_hat_eep::{gpio_map::GpioPin, EEPAtom, LinuxDTB, EEP};
+use rpi_hat_eep::{gpio_map::GpioPin, EepAtom, LinuxDTB, Eep};
 use std::env;
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -13,7 +13,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
 
-fn vendor_atom(config: &EEPConfig) -> EEPAtom {
+fn vendor_atom(config: &EepConfig) -> EepAtom {
     let uuid = config.uuid.unwrap_or_else(uuid::Uuid::new_v4);
     let pid = match config.pid {
         Some(pid) => pid,
@@ -31,7 +31,7 @@ fn vendor_atom(config: &EEPConfig) -> EEPAtom {
         Some(pstr) => pstr.clone(),
         None => panic!("ERROR: product string missing!"),
     };
-    let data = rpi_hat_eep::EEPAtomVendorData {
+    let data = rpi_hat_eep::EepAtomVendorData {
         uuid,
         pid,
         pver,
@@ -39,10 +39,10 @@ fn vendor_atom(config: &EEPConfig) -> EEPAtom {
         pstr,
     };
 
-    EEPAtom::new_vendor_info(data)
+    EepAtom::new_vendor_info(data)
 }
 
-fn gpio_map_atom(config: &EEPConfig) -> EEPAtom {
+fn gpio_map_atom(config: &EepConfig) -> EepAtom {
     let drive = match config.gpio_drive {
         Some(drive) => drive,
         None => {
@@ -71,15 +71,15 @@ fn gpio_map_atom(config: &EEPConfig) -> EEPAtom {
             gpio_map::GpioBackPower::None
         }
     };
-    let mut gpio_map = gpio_map::EEPAtomGpioMapData::new(drive, slew, hyst, power);
+    let mut gpio_map = gpio_map::EepAtomGpioMapData::new(drive, slew, hyst, power);
 
     for gpio in &config.gpios {
         gpio_map.push(gpio.clone());
     }
-    EEPAtom::new_gpio_map(gpio_map)
+    EepAtom::new_gpio_map(gpio_map)
 }
 
-struct EEPConfig {
+struct EepConfig {
     uuid: Option<uuid::Uuid>,
     pid: Option<u16>,
     pver: Option<u16>,
@@ -94,9 +94,9 @@ struct EEPConfig {
     custom: Vec<Vec<u8>>,
 }
 
-impl Default for EEPConfig {
+impl Default for EepConfig {
     fn default() -> Self {
-        EEPConfig {
+        EepConfig {
             uuid: None,
             pid: None,
             pver: None,
@@ -140,7 +140,7 @@ fn parse_line_hex_u16(line: &str) -> u16 {
     u16::from_str_radix(iter.next().unwrap().trim_start_matches("0x"), 16).unwrap()
 }
 
-fn parse_config(eep_config: &mut EEPConfig, config_str: &str) {
+fn parse_config(eep_config: &mut EepConfig, config_str: &str) {
     let mut custom_data_str: Option<String> = None;
     for mut line in config_str.lines() {
         line = line.trim();
@@ -265,7 +265,7 @@ fn main() {
     let mut config_string = String::new();
     let _ = input_file.read_to_string(&mut config_string);
 
-    let mut eep_config = EEPConfig::default();
+    let mut eep_config = EepConfig::default();
     parse_config(&mut eep_config, &config_string);
 
     if args.len() > 3 {
@@ -312,18 +312,18 @@ fn main() {
         }
     }
 
-    let mut eep = EEP::new();
+    let mut eep = Eep::new();
     eep.push(vendor_atom(&eep_config));
     eep.push(gpio_map_atom(&eep_config));
 
     if eep_config.dtb.is_some() {
-        let data = rpi_hat_eep::EEPAtomLinuxDTBData::new(eep_config.dtb.unwrap());
-        eep.push(EEPAtom::new_linux_dtb(data));
+        let data = rpi_hat_eep::EepAtomLinuxDTBData::new(eep_config.dtb.unwrap());
+        eep.push(EepAtom::new_linux_dtb(data));
     }
 
     for data in eep_config.custom {
-        let data = rpi_hat_eep::EEPAtomCustomData::new(data);
-        eep.push(EEPAtom::new_custom(data));
+        let data = rpi_hat_eep::EepAtomCustomData::new(data);
+        eep.push(EepAtom::new_custom(data));
     }
 
     //println!("eeplen: {}", eep.len());
