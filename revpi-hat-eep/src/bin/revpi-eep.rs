@@ -8,7 +8,8 @@ use revpi_hat_eep::error::RevPiError;
 use revpi_hat_eep::RevPiHatEeprom;
 use rpi_hat_eep::{gpio_map, EepAtom, EepAtomCustomData, ToBytes, Eep};
 use std::error::Error;
-use std::fs::File;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::PathBuf;
 use std::process;
 
@@ -182,7 +183,7 @@ pub struct Cli {
     pub config: PathBuf,
     /// Output file name
     #[clap(value_parser, value_name = "OUTPUT", default_value = "out.eep")]
-    pub outfile: PathBuf,
+    pub outfile_name: PathBuf,
 }
 
 fn main() {
@@ -219,21 +220,40 @@ fn main() {
         }
     }
 
-    let _outfile = match File::create(&cli.outfile) {
-        Ok(outfile) => outfile,
-        Err(e) => {
-            eprintln!(
-                "ERROR: Can't create file `{}`: {e}",
-                cli.outfile.to_string_lossy()
-            );
-            process::exit(1)
-        }
-    };
-
     let edate = match cli.edate {
         Some(edate) => edate,
         None => chrono::Local::today().naive_local(),
     };
 
     let eep = create_rpi_eep(config, cli.serial, edate, cli.mac).unwrap();
+    let mut buf: Vec<u8> = Vec::new();
+    eep.to_bytes(&mut buf);
+
+    let mut output_file = match OpenOptions::new()
+        .read(false)
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open(&cli.outfile_name)
+    {
+        Ok(file) => file,
+        Err(e) => {
+            eprintln!(
+                "ERROR: Can't open output file: `{}': {e}",
+                cli.outfile_name.to_string_lossy()
+            );
+            process::exit(-1);
+        }
+    };
+
+    match output_file.write_all(&buf) {
+        Ok(x) => x,
+        Err(e) => {
+            eprintln!(
+                "ERROR: Can't write data to the output file: `{}': {e}",
+                cli.outfile_name.to_string_lossy()
+            );
+            process::exit(-1);
+        }
+    }
 }
