@@ -204,6 +204,7 @@ impl EepAtomGpioMapData {
 
 impl ToBytes for EepAtomGpioMapData {
     fn len(&self) -> usize {
+        // 1 byte drive_bank; 1 byte power; 28 bytes gpio pins configuration
         1 + 1 + 28
     }
 

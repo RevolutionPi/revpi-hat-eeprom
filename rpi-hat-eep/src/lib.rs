@@ -90,6 +90,14 @@ impl Eep {
 
 impl ToBytes for Eep {
     fn len(&self) -> usize {
+        /*
+         * Bytes   Field
+         * 4       signature
+         * 1       version
+         * 1       reserved
+         * 2       numatoms
+         * 4       eeplen
+         */
         let mut len = 4 + 1 + 1 + 2 + 4;
         for atom in &self.atoms {
             len += atom.len();
@@ -229,6 +237,14 @@ impl EepAtom {
 
 impl ToBytes for EepAtom {
     fn len(&self) -> usize {
+        /*
+         * Bytes   Field
+         * 2       type
+         * 2       count
+         * 4       dlen
+         * N       data
+         * 2       crc16
+         */
         2 + 2 + 4 + self.data.len() + 2
     }
 
@@ -308,6 +324,16 @@ impl EepAtomVendorData {
 
 impl ToBytes for EepAtomVendorData {
     fn len(&self) -> usize {
+        /*
+         * Bytes   Field
+         * 16      uuid
+         * 2       pid
+         * 2       pver
+         * 1       vslen
+         * 1       pslen
+         * X       vstr
+         * Y       pstr
+         */
         16 + 2 + 2 + 1 + 1 + self.vstr.len() + self.pstr.len()
     }
 
