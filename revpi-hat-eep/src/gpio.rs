@@ -239,7 +239,7 @@ pub struct GpioPin {
     pull: GpioPull,
 }
 
-/// This struct represents the GPIO configuration the the HAT EEPROM
+/// This struct represents the GPIO configuration of the HAT EEPROM
 ///
 /// This struct is used to deserialize the GPIO configuration from a RevPi HAT
 /// EEPROM configuration in json format. See [RevPi HAT EEPROM Format: GPIO map
