@@ -48,8 +48,14 @@ pub struct Eep {
 }
 
 impl Eep {
-    pub fn new() -> Eep {
-        let atoms: Vec<EepAtom> = Vec::new();
+    pub fn new(
+        vendor_data: EepAtomVendorData,
+        gpio_map_data: EepAtomGpioMapData,
+    ) -> Eep {
+        let atoms: Vec<EepAtom> = vec![
+            EepAtom::new_vendor_info(vendor_data),
+            EepAtom::new_gpio_map(gpio_map_data),
+        ];
         Eep { atoms }
     }
 
@@ -105,12 +111,6 @@ impl ToBytes for Eep {
         for atom in &self.atoms {
             atom.to_bytes(buf);
         }
-    }
-}
-
-impl Default for Eep {
-    fn default() -> Self {
-        Eep::new()
     }
 }
 

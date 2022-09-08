@@ -3,8 +3,7 @@
 
 extern crate rpi_hat_eep;
 
-use rpi_hat_eep::{gpio_map, ToBytes};
-use rpi_hat_eep::{Eep, EepAtom, LinuxDTB};
+use rpi_hat_eep::{gpio_map, Eep, EepAtom, EepAtomVendorData, LinuxDTB, ToBytes};
 use std::env;
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -13,7 +12,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
 
-fn vendor_atom(config: &EepConfig) -> EepAtom {
+fn vendor_atom(config: &EepConfig) -> EepAtomVendorData {
     let uuid = config.uuid.unwrap_or_else(uuid::Uuid::new_v4);
     let pid = match config.pid {
         Some(pid) => pid,
@@ -31,18 +30,10 @@ fn vendor_atom(config: &EepConfig) -> EepAtom {
         Some(pstr) => pstr.clone(),
         None => panic!("ERROR: product string missing!"),
     };
-    let data = rpi_hat_eep::EepAtomVendorData {
-        uuid,
-        pid,
-        pver,
-        vstr,
-        pstr,
-    };
-
-    EepAtom::new_vendor_info(data)
+    rpi_hat_eep::EepAtomVendorData::new(uuid, pid, pver, vstr, pstr).unwrap()
 }
 
-fn gpio_map_atom(config: &EepConfig) -> EepAtom {
+fn gpio_map_atom(config: &EepConfig) -> gpio_map::EepAtomGpioMapData {
     let drive = match config.gpio_drive {
         Some(drive) => drive,
         None => {
@@ -76,7 +67,7 @@ fn gpio_map_atom(config: &EepConfig) -> EepAtom {
     for gpio in &config.gpios {
         gpio_map.set(gpio.0 as usize, gpio.1.clone()).unwrap();
     }
-    EepAtom::new_gpio_map(gpio_map)
+    gpio_map
 }
 
 struct EepConfig {
@@ -312,9 +303,7 @@ fn main() {
         }
     }
 
-    let mut eep = Eep::new();
-    eep.push(vendor_atom(&eep_config));
-    eep.push(gpio_map_atom(&eep_config));
+    let mut eep = Eep::new(vendor_atom(&eep_config), gpio_map_atom(&eep_config));
 
     if eep_config.dtb.is_some() {
         let data = rpi_hat_eep::EepAtomLinuxDTBData::new(eep_config.dtb.unwrap());
