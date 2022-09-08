@@ -189,15 +189,15 @@ impl EepAtomGpioMapData {
             slew,
             hysteresis,
             back_power,
-            gpios: Vec::with_capacity(MAX_GPIOS),
+            gpios: vec![GpioPin::default(); MAX_GPIOS],
         }
     }
 
-    pub fn push(&mut self, gpio: GpioPin) -> Result<(), String> {
-        if self.gpios.len() >= MAX_GPIOS {
-            return Err(format!("gpios > MAX_GPIOS ({})", MAX_GPIOS));
+    pub fn set(&mut self, n: usize, gpio: GpioPin) -> Result<(), String> {
+        if n > self.gpios.len() {
+            return Err("gpio out of bound".to_string());
         }
-        self.gpios.push(gpio);
+        self.gpios[n] = gpio;
         Ok(())
     }
 }
@@ -225,14 +225,17 @@ impl ToBytes for EepAtomGpioMapData {
 
 #[test]
 fn test_eep_atom_gpio_map() {
-    let mut gpio_map = EepAtomGpioMapData::new(
-        GpioDrive::Drive8mA,
+    let gpio_map = EepAtomGpioMapData::new(
+        GpioDrive::Default,
         GpioSlew::Default,
         GpioHysteresis::Default,
         GpioBackPower::None,
     );
-    for _ in 0..MAX_GPIOS {
-        gpio_map.push(GpioPin::new(GpioFsel::Input, GpioPull::Default, false));
+
+    let mut buf: Vec<u8> = Vec::with_capacity(30);
+    gpio_map.to_bytes(&mut buf);
+    assert_eq!(buf.len(), 30);
+    for b in buf {
+        assert_eq!(b, 0);
     }
-    println!("{:?}", gpio_map);
 }

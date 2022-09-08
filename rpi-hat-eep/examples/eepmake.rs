@@ -4,7 +4,7 @@
 extern crate rpi_hat_eep;
 
 use rpi_hat_eep::{gpio_map, ToBytes};
-use rpi_hat_eep::{gpio_map::GpioPin, EepAtom, LinuxDTB, Eep};
+use rpi_hat_eep::{Eep, EepAtom, LinuxDTB};
 use std::env;
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -74,7 +74,7 @@ fn gpio_map_atom(config: &EepConfig) -> EepAtom {
     let mut gpio_map = gpio_map::EepAtomGpioMapData::new(drive, slew, hyst, power);
 
     for gpio in &config.gpios {
-        gpio_map.push(gpio.clone());
+        gpio_map.set(gpio.0 as usize, gpio.1.clone()).unwrap();
     }
     EepAtom::new_gpio_map(gpio_map)
 }
@@ -89,7 +89,7 @@ struct EepConfig {
     gpio_slew: Option<gpio_map::GpioSlew>,
     gpio_hyst: Option<gpio_map::GpioHysteresis>,
     back_power: Option<gpio_map::GpioBackPower>,
-    gpios: Vec<gpio_map::GpioPin>,
+    gpios: Vec<(u8, gpio_map::GpioPin)>,
     dtb: Option<rpi_hat_eep::LinuxDTB>,
     custom: Vec<Vec<u8>>,
 }
@@ -106,7 +106,7 @@ impl Default for EepConfig {
             gpio_slew: None,
             gpio_hyst: None,
             back_power: None,
-            gpios: vec![GpioPin::default(); 28],
+            gpios: Vec::new(),
             dtb: None,
             custom: Vec::new(),
         }
@@ -207,7 +207,7 @@ fn parse_config(eep_config: &mut EepConfig, config_str: &str) {
         } else if line.starts_with("setgpio") {
             let arg = line.trim_start_matches("setgpio").trim_start();
             let chunks: Vec<&str> = arg.split_ascii_whitespace().collect();
-            let gpio: usize = chunks[0].parse().expect("Bad GPIO pin number!");
+            let gpio: u8 = chunks[0].parse().expect("Bad GPIO pin number!");
             let func = match chunks[1] {
                 "INPUT" => Some(gpio_map::GpioFsel::Input),
                 "OUTPUT" => Some(gpio_map::GpioFsel::Output),
@@ -228,8 +228,8 @@ fn parse_config(eep_config: &mut EepConfig, config_str: &str) {
                 _ => None,
             }
             .unwrap();
-            eep_config.gpios[gpio] = gpio_map::GpioPin::new(func, pull, false);
-            println!("SETGPIO: {} {:?}", gpio, eep_config.gpios[gpio]);
+            println!("SETGPIO: {} {:?} {:?}", gpio, func, pull);
+            eep_config.gpios.push((gpio, gpio_map::GpioPin::new(func, pull, true)));
         } else {
             eprintln!("UNKNOWN");
         }
