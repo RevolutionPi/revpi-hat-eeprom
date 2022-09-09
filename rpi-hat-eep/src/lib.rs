@@ -197,7 +197,7 @@ impl EepAtom {
     pub fn new_vendor_info(data: EepAtomVendorData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::VendorInfo,
-            count: 0xffff,
+            count: 0,
             data: EepAtomData::VendorInfo(data),
         }
     }
@@ -205,7 +205,7 @@ impl EepAtom {
     pub fn new_gpio_map(data: EepAtomGpioMapData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::GpioMap,
-            count: 0xffff,
+            count: 1,
             data: EepAtomData::GpioMap(data),
         }
     }
@@ -213,7 +213,7 @@ impl EepAtom {
     pub fn new_linux_dtb(data: EepAtomLinuxDTBData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::LinuxDTB,
-            count: 0xffff,
+            count: 2,
             data: EepAtomData::LinuxDTB(data),
         }
     }
