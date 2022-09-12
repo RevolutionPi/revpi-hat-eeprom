@@ -50,6 +50,8 @@ _gpiobanks_ describes settings for a gpio bank of the SoC. At the moment only ba
 
 ### Main properties
 
+All fields are mandatory.
+
 | Field     | JSON Datatype             | Range       | Description | Example  |
 |:----------|:--------------------------|:------------|:------------|:---------|
 | version   | number                    | u16         | Version of the EEPROM format | 1 |
@@ -69,12 +71,12 @@ _gpiobanks_ describes settings for a gpio bank of the SoC. At the moment only ba
 > #### INFO
 > Only GPIOs that are listed in the JSON will be modified. All other GPIOs will keep their settings.
 
-| Field      | JSON Datatype         | Range     | Description                              |
-|:-----------|:----------------------|:----------|:-----------------------------------------|
-| drive      | string (enum)         | see below | Set drive strength of gpio bank          |
-| slew       | string (enum)         | see below | Set slew rate of gpio bank               |
-| hysteresis | string (enum)         | see below | Set hysteresis of gpio bank              |
-| gpios      | array of gpio objects |           | List of gpios, that should be configured |
+| Field      | Field Type | JSON Datatype         | Range     | Description                              |
+|:-----------|:-----------|:----------------------|:----------|:-----------------------------------------|
+| drive      | mandatory  | string (enum)         | see below | Set drive strength of gpio bank          |
+| slew       | mandatory  | string (enum)         | see below | Set slew rate of gpio bank               |
+| hysteresis | mandatory  | string (enum)         | see below | Set hysteresis of gpio bank              |
+| gpios      | mandatory  | array of gpio objects |           | List of gpios, that should be configured |
 
 #### Enum _drive_ property
 
@@ -117,11 +119,11 @@ Controls the different hysteresis settings on the gpio bank.
 
 ### GPIO object
 
-| Field   | JSON Datatype | Range             | Description           |
-|:--------|:--------------|:------------------|:----------------------|
-| "gpio"  | number        | 2 - 27 for bank 0 | Number of the GPIO    |
-| "fsel"  | string (enum) | see below         | Function select       |
-| "pull"  | string (enum) | see below         | Pull resistor setting |
+| Field   | Field Type | JSON Datatype | Range             | Description           |
+|:--------|:-----------|:--------------|:------------------|:----------------------|
+| "gpio"  | mandatory  | number        | 2 - 27 for bank 0 | Number of the GPIO    |
+| "fsel"  | mandatory  | string (enum) | see below         | Function select       |
+| "pull"  | mandatory  | string (enum) | see below         | Pull resistor setting |
 
 #### Enum _fsel_ property
 
