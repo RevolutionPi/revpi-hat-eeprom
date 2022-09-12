@@ -1,0 +1,95 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://revpi.kunbus.com/revpi.schema.json",
+    "title": "RevPi HAT EEPROM JSON",
+    "description": "The JSON format used in the revpi hat eeprom tool for additional configuration",
+    "type": "object",
+    "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "gpiobanks" ],
+    "properties": {
+        "version": {
+            "description": "RevPi HAT EEPROM format version",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "vstr": {
+            "description": "Vendor string",
+            "type": "string",
+            "maxLength": 255
+        },
+        "pstr": {
+            "description": "Product name",
+            "type": "string",
+            "maxLength": 255
+        },
+        "pid": {
+            "description": "Product identifier",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "prev": {
+            "description": "Product revision",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "pver": {
+            "description": "Customer visible product version",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "dtstr": {
+            "description": "DeviceTree overlay name for this device",
+            "type": "string"
+        },
+        "gpiobanks": {
+            "description": "GPIOBank configuration (only bank 0 is supported at the moment)",
+            "type": "array",
+            "maxItems": 1,
+            "items": {
+                "type": "object",
+                "required": [ "drive", "slew", "hysteresis", "gpios" ],
+                "properties": {
+                    "drive": {
+                        "description": "Drive strength of each pin on this gpiobank",
+                        "enum": [ "2mA", "4mA", "6mA", "8mA", "10mA", "12mA", "14mA", "16mA" ]
+                    },
+                    "slew": {
+                        "description": "Slew rate setting for each pin on this gpiobank",
+                        "enum": [ "default", "ratelimiting", "nolimit" ]
+                    },
+                    "hysteresis": {
+                        "description": "Hysteresis setting for each pin on this gpiobank",
+                        "enum": [ "default", "disable", "enable" ]
+                    },
+                    "gpios": {
+                        "description": "List of settings for single gpios",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [ "gpio", "fsel", "pull" ],
+                            "properties": {
+                                "gpio": {
+                                    "description": "GPIO or pin number",
+                                    "type": "integer",
+                                    "minimum": 2,
+                                    "maximum": 27
+                                },
+                                "fsel": {
+                                    "description": "Alternate function setting for this gpio",
+                                    "enum": [ "input", "output", "alt0", "alt1", "alt2", "alt3", "alt4", "alt5" ]
+                                },
+                                "pull": {
+                                    "description": "Pull resistor setting for this gpio",
+                                    "enum": [ "default", "up", "down", "none" ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
