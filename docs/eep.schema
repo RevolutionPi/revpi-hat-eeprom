@@ -5,6 +5,7 @@
     "description": "The JSON format used in the revpi hat eeprom tool for additional configuration",
     "type": "object",
     "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "gpiobanks" ],
+    "additionalProperties": false,
     "properties": {
         "version": {
             "description": "RevPi HAT EEPROM format version",
@@ -51,6 +52,7 @@
             "items": {
                 "type": "object",
                 "required": [ "drive", "slew", "hysteresis", "gpios" ],
+                "additionalProperties": false,
                 "properties": {
                     "drive": {
                         "description": "Drive strength of each pin on this gpiobank",
@@ -67,9 +69,11 @@
                     "gpios": {
                         "description": "List of settings for single gpios",
                         "type": "array",
+                        "uniqueItems": true,
                         "items": {
                             "type": "object",
                             "required": [ "gpio", "fsel", "pull" ],
+                            "additionalProperties": false,
                             "properties": {
                                 "gpio": {
                                     "description": "GPIO or pin number",
