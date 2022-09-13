@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 /// This struct describs the RevPi HAT EEPROM configuration
 ///
-/// This describe the [RevPi HAT EEPROM](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md)
+/// This describe the [RevPi HAT EEPROM](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md)
 /// configuration. The struct is used to parse the JSON confirguation with
 /// [serde_json](https://docs.serde.rs/serde_json/).
 ///
@@ -54,21 +54,21 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct RevPiHatEeprom {
-    /// The version of the used [RevPi HAT EEPROM Format](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#0-format-version)
+    /// The version of the used [RevPi HAT EEPROM Format](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#0-format-version)
     pub version: u16,
-    /// The vendor string (max. 255 chars (bytes)), see [Vendor String](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#vendor-string-vstr)
+    /// The vendor string (max. 255 chars (bytes)), see [Vendor String](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#vendor-string-vstr)
     pub vstr: String,
-    /// The product string (max. 255 chars (bytes)), see [Product String](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#product-string-pstr)
+    /// The product string (max. 255 chars (bytes)), see [Product String](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#product-string-pstr)
     pub pstr: String,
-    /// The product ID (16 bits), see [Product ID](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#product-id-pid)
+    /// The product ID (16 bits), see [Product ID](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#product-id-pid)
     pub pid: u16,
-    /// The product revision (16 bits), see [Product Revision](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#2-product-revision-prev)
+    /// The product revision (16 bits), see [Product Revision](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#2-product-revision-prev)
     pub prev: u16,
-    /// The customer visible product version multiplied with 100 (16 bits), see [Product Version](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#product-version-pver)
+    /// The customer visible product version multiplied with 100 (16 bits), see [Product Version](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#product-version-pver)
     pub pver: u16,
-    /// The device tree overlay name, see [Linux Device Tree (Blob) Atom](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#linux-device-tree-blob-atom)
+    /// The device tree overlay name, see [Linux Device Tree (Blob) Atom](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#linux-device-tree-blob-atom)
     pub dtstr: String,
-    /// The configuration of the first gpiobank, see [GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
+    /// The configuration of the first gpiobank, see [GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
     pub gpiobanks: Vec<GpioBank>,
 }
 
