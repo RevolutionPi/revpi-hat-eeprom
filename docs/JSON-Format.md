@@ -8,7 +8,7 @@ To be able to generate an image for the RevPi HAT EEPROM with extensions to the 
 
 The JSON for the Revolution Pi HAT EEPROM tool contains one main section with data like product type and revision and two JSON objects each of which is added as array.
 
-_gpiobanks_ describes settings for a gpio bank of the SoC. At the moment only bank 0 is supported. See [The Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#the-raspberry-pi-hat-id-eeprom-format-specification) for more information. It contains an array of gpio objects with settings for separate gpios. Add only gpios to this array whose settings should be changed.
+_gpiobanks_ describes settings for a gpio bank of the SoC. At the moment only bank 0 is supported. See [The Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#the-raspberry-pi-hat-id-eeprom-format-specification) for more information. It contains an array of gpio objects with settings for separate gpios. Add only gpios to this array whose settings should be changed.
 
 ### Example JSON
 

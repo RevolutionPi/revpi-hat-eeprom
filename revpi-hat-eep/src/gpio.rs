@@ -15,7 +15,7 @@ const MAX_GPIOS: usize = 28;
 /// 16 mA. It can also be left at default. Then the actual drive strength
 /// depends not on this configuration.
 ///
-/// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
+/// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioBankDrive {
@@ -77,7 +77,7 @@ impl From<GpioBankDrive> for gpio_map::GpioDrive {
 /// slew limiting. It can also be left at default. Then the actual slew rate
 /// depends not on this configuration.
 ///
-/// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
+/// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioBankSlew {
@@ -113,7 +113,7 @@ impl From<GpioBankSlew> for gpio_map::GpioSlew {
 /// hysteresis enabled. It can also be left at default. Then the actual
 /// hysteresis depends not on this configuration.
 ///
-/// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
+/// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioBankHysteresis {
@@ -243,7 +243,7 @@ pub struct GpioPin {
 ///
 /// This struct is used to deserialize the GPIO configuration from a RevPi HAT
 /// EEPROM configuration in json format. See [RevPi HAT EEPROM Format: GPIO map
-/// atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
+/// atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
 /// for details about the meaning of the values in this struct.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
