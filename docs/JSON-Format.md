@@ -172,5 +172,8 @@ After jsonschema is installed, it can be called from the commandline with your j
 jsonschema --instance own.json eep.schema
 ```
 
+> #### Warning
+> The schema doesn't restrict multiple definitions of the same GPIO in `gpiobanks.gpios`.  Defining two GPIO entries with the same GPIO number but different settings for `fsel` and/or `pull` will not result in a validation error. Only if both GPIO entries are identical, the validation will fail.
+
 
 ¹ https://github.com/raspberrypi/hats/blob/master/eeprom-format.md
