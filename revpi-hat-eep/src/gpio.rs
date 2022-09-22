@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
-use crate::error::RevPiError;
+use crate::ValidationError;
 use rpi_hat_eep::gpio_map;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
@@ -255,23 +255,23 @@ pub struct GpioBank {
 }
 
 impl GpioBank {
-    pub fn validate(&self) -> Result<(), RevPiError> {
+    pub fn validate(&self) -> Result<(), ValidationError> {
         let mut configured_gpios: Vec<bool> = vec![false; MAX_GPIOS];
         for gpio in &self.gpios {
             if gpio.gpio == 0 || gpio.gpio == 1 {
-                return Err(RevPiError::ValidationError(format!(
+                return Err(ValidationError(format!(
                     "gpio# mustn't be 0 or 1 (they are used for the HAT EEPROM): {}",
                     gpio.gpio
                 )));
             }
             if gpio.gpio as usize >= MAX_GPIOS {
-                return Err(RevPiError::ValidationError(format!(
+                return Err(ValidationError(format!(
                     "gpio#: {} >= {}",
                     gpio.gpio, MAX_GPIOS
                 )));
             }
             if configured_gpios[gpio.gpio as usize] {
-                return Err(RevPiError::ValidationError(format!(
+                return Err(ValidationError(format!(
                     "gpio#: {} defined more then once",
                     gpio.gpio
                 )));
@@ -289,7 +289,7 @@ impl Display for GpioBank {
 }
 
 impl TryFrom<GpioBank> for gpio_map::EepAtomGpioMapData {
-    type Error = RevPiError;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(bank: GpioBank) -> Result<Self, Self::Error> {
         let mut gpio_map = gpio_map::EepAtomGpioMapData::new(

@@ -2,11 +2,20 @@
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
 pub mod gpio;
-pub mod error;
 
 use self::gpio::GpioBank;
-use self::error::RevPiError;
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug)]
+pub struct ValidationError(String);
+
+impl std::error::Error for ValidationError {}
+
+impl std::fmt::Display for ValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 /// This struct describs the RevPi HAT EEPROM configuration
 ///
@@ -72,21 +81,45 @@ pub struct RevPiHatEeprom {
     pub gpiobanks: Vec<GpioBank>,
 }
 
-pub fn parse_config(s: &str) -> Result<RevPiHatEeprom, RevPiError> {
-    serde_json::from_str(s).map_err(RevPiError::from)
+pub fn parse_config(s: &str) -> Result<RevPiHatEeprom, Box<dyn std::error::Error>> {
+    let eep: RevPiHatEeprom = serde_json::from_str(s)?;
+    validate(&eep)?;
+    Ok(eep)
 }
 
-impl RevPiHatEeprom {
-    pub fn validate(&self) -> Result<(), RevPiError> {
-        if self.version != 1 {
-            return Err(RevPiError::ValidationError(format!(
-                "unsupported format version: {}",
-                self.version
-            )));
-        }
-        for bank in &self.gpiobanks {
-            bank.validate()?;
-        }
-        Ok(())
+fn validate(eep: &RevPiHatEeprom) -> Result<(), ValidationError> {
+    if eep.version != 1 {
+        return Err(ValidationError(format!(
+            "invalid value: `{}`: Unsupported format version",
+            eep.version
+        )));
     }
+    if eep.pstr.len() >= 256 {
+        return Err(ValidationError(format!(
+            "invalid value: `{}`: Product string to long {} (max: {}) bytes",
+            eep.pstr,
+            eep.pstr.len(),
+            u8::MAX
+        )));
+    }
+    if eep.vstr.len() >= 256 {
+        return Err(ValidationError(format!(
+            "invalid value: `{}`: Vendor string to long: {} (max: {}) bytes",
+            eep.vstr,
+            eep.vstr.len(),
+            u8::MAX
+        )));
+    }
+    if eep.dtstr.len() >= u32::MAX as usize {
+        return Err(ValidationError(format!(
+            "invalid value: `{}`: Device tree string to long: {} (max: {}) bytes",
+            eep.dtstr,
+            eep.dtstr.len(),
+            u32::MAX
+        )));
+    }
+    for bank in &eep.gpiobanks {
+        bank.validate()?;
+    }
+    Ok(())
 }

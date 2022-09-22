@@ -19,6 +19,5 @@ md5 = "0.7"
 num = "0.4"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-thiserror = "1.0"
 uuid = { version = "1.1", features = ["serde"] }
 rpi-hat-eep = { path = "../rpi-hat-eep" }

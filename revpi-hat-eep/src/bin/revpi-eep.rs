@@ -4,10 +4,8 @@
 use chrono::NaiveDate;
 use clap::Parser;
 use eui48::MacAddress;
-use revpi_hat_eep::error::RevPiError;
 use revpi_hat_eep::RevPiHatEeprom;
 use rpi_hat_eep::{gpio_map, EepAtom, EepAtomCustomData, ToBytes, Eep};
-use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
@@ -125,7 +123,7 @@ fn create_rpi_eep(
     serial: u32,
     edate: NaiveDate,
     mac: MacAddress,
-) -> Result<rpi_hat_eep::Eep, RevPiError> {
+) -> Result<rpi_hat_eep::Eep, Box<dyn std::error::Error>> {
     let uuid = calc_uuid(config.pid, config.pver, config.prev, serial);
     let vendor_data = rpi_hat_eep::EepAtomVendorData::new(
         uuid,
@@ -204,21 +202,12 @@ fn main() {
         Ok(config) => config,
         Err(e) => {
             eprintln!(
-                "ERROR: Invalid config file `{}': {e}: {}",
+                "ERROR: Invalid config file `{}': {e}",
                 cli.config.to_string_lossy(),
-                e.source().unwrap()
             );
             process::exit(1);
         }
     };
-
-    match config.validate() {
-        Ok(_) => (),
-        Err(e) => {
-            eprintln!("ERROR: Invalid config: {e}: {}", e);
-            process::exit(1);
-        }
-    }
 
     let edate = match cli.edate {
         Some(edate) => edate,
