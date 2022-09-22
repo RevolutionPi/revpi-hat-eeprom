@@ -257,7 +257,7 @@ impl ToBytes for EepAtomGpioMapData {
 
 #[test]
 fn test_eep_atom_gpio_map() {
-    let gpio_map = EepAtomGpioMapData::new(
+    let mut gpio_map = EepAtomGpioMapData::new(
         GpioDrive::Default,
         GpioSlew::Default,
         GpioHysteresis::Default,
@@ -274,4 +274,42 @@ fn test_eep_atom_gpio_map() {
     for b in buf {
         assert_eq!(b, 0);
     }
+
+    /* chack that set() only allows setting gpios in the range of 0-27 */
+    assert_eq!(
+        gpio_map.set(
+            0,
+            GpioPin {
+                fsel: GpioFsel::Alt4,
+                pull: GpioPull::Down,
+                used: true
+            }
+        ),
+        Ok(())
+    );
+    assert_eq!(
+        gpio_map.set(
+            MAX_GPIOS - 1,
+            GpioPin {
+                fsel: GpioFsel::Alt5,
+                pull: GpioPull::NoPull,
+                used: true
+            }
+        ),
+        Ok(())
+    );
+    assert_eq!(
+        gpio_map.set(
+            MAX_GPIOS,
+            GpioPin {
+                fsel: GpioFsel::Alt0,
+                pull: GpioPull::Up,
+                used: true
+            }
+        ),
+        Err(GpioError {
+            gpio_nr: MAX_GPIOS,
+            etype: GpioErrorType::OutOfBound
+        })
+    );
 }
