@@ -138,15 +138,14 @@ fn parse_config(eep_config: &mut EepConfig, config_str: &str) {
         if line.starts_with('#') || line.is_empty() {
             continue;
         }
-        if custom_data_str.is_some() {
+        if let Some(mut data) = custom_data_str {
             if line.starts_with("end") {
                 eep_config
                     .custom
-                    .extend(hex::decode(custom_data_str.unwrap()));
+                    .extend(hex::decode(data));
                 custom_data_str = None;
                 continue;
             }
-            let mut data = custom_data_str.unwrap();
             for c in line.chars() {
                 if c.is_ascii_whitespace() {
                     continue;
@@ -305,8 +304,8 @@ fn main() {
 
     let mut eep = Eep::new(vendor_atom(&eep_config), gpio_map_atom(&eep_config));
 
-    if eep_config.dtb.is_some() {
-        let data = rpi_hat_eep::EepAtomLinuxDTBData::new(eep_config.dtb.unwrap());
+    if let Some(dtb) = eep_config.dtb {
+        let data = rpi_hat_eep::EepAtomLinuxDTBData::new(dtb);
         eep.push(EepAtom::new_linux_dtb(data)).unwrap();
     }
 
