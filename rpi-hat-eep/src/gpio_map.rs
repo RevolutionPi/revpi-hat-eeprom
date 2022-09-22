@@ -6,6 +6,34 @@ const MAX_GPIOS: usize = 28;
 use crate::ToBytes;
 use num_derive::FromPrimitive;
 
+#[derive(Debug, PartialEq)]
+enum GpioErrorType {
+    OutOfBound,
+}
+
+impl std::fmt::Display for GpioErrorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            GpioErrorType::OutOfBound => "GPIO index out of bound",
+        };
+        write!(f, "{}", s)
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct GpioError {
+    gpio_nr: usize,
+    etype: GpioErrorType,
+}
+
+impl std::error::Error for GpioError {}
+
+impl std::fmt::Display for GpioError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "gpio: {}: {}", self.gpio_nr, self.etype)
+    }
+}
+
 /// 0=leave at default, 1-8=drive*2mA, 9-15=reserved
 #[derive(Clone, Copy, Debug, FromPrimitive)]
 pub enum GpioDrive {
@@ -193,9 +221,12 @@ impl EepAtomGpioMapData {
         }
     }
 
-    pub fn set(&mut self, n: usize, gpio: GpioPin) -> Result<(), String> {
-        if n > self.gpios.len() {
-            return Err("gpio out of bound".to_string());
+    pub fn set(&mut self, n: usize, gpio: GpioPin) -> Result<(), GpioError> {
+        if n >= self.gpios.len() {
+            return Err(GpioError {
+                gpio_nr: n,
+                etype: GpioErrorType::OutOfBound,
+            });
         }
         self.gpios[n] = gpio;
         Ok(())
