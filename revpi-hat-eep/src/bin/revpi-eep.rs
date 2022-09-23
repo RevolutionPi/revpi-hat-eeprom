@@ -231,7 +231,7 @@ fn main() {
                 "ERROR: Can't open output file: `{}': {e}",
                 cli.outfile_name.to_string_lossy()
             );
-            process::exit(-1);
+            process::exit(1);
         }
     };
 
@@ -242,7 +242,7 @@ fn main() {
                 "ERROR: Can't write data to the output file: `{}': {e}",
                 cli.outfile_name.to_string_lossy()
             );
-            process::exit(-1);
+            process::exit(1);
         }
     }
 }
