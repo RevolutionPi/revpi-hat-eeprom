@@ -350,20 +350,20 @@ impl EepAtomVendorData {
         pver: u16,
         vstr: String,
         pstr: String,
-    ) -> Result<EepAtomVendorData, String> {
-        if vstr.len() > u8::MAX.into() {
-            return Err(format!(
+    ) -> Result<EepAtomVendorData, EepError> {
+        if vstr.len() > u8::MAX as usize {
+            return Err(EepError(format!(
                 "Vendor string to long: {} (max: {} bytes)",
                 vstr.len(),
                 u8::MAX
-            ));
+            )));
         }
-        if pstr.len() > u8::MAX.into() {
-            return Err(format!(
+        if pstr.len() > u8::MAX as usize {
+            return Err(EepError(format!(
                 "Product string to long: {} (max: {} bytes)",
                 pstr.len(),
                 u8::MAX
-            ));
+            )));
         }
         Ok(EepAtomVendorData {
             uuid,
