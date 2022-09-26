@@ -214,7 +214,13 @@ fn main() {
         None => chrono::Local::today().naive_local(),
     };
 
-    let eep = create_rpi_eep(config, cli.serial, edate, cli.mac).unwrap();
+    let eep = match create_rpi_eep(config, cli.serial, edate, cli.mac) {
+        Ok(eep) => eep,
+        Err(e) => {
+            eprintln!("Error: Can't create EEP: {e}");
+            process::exit(1);
+        }
+    };
     let mut buf: Vec<u8> = Vec::new();
     eep.to_bytes(&mut buf);
 
