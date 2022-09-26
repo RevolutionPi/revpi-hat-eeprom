@@ -29,6 +29,17 @@ pub trait ToBytes {
     fn to_bytes(&self, buf: &mut Vec<u8>);
 }
 
+#[derive(Debug)]
+pub struct EepError(String);
+
+impl std::fmt::Display for EepError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for EepError {}
+
 /// This struct implemnts the EEPROM Structure
 ///
 /// [EEPROM Structure](https://github.com/raspberrypi/hats/blob/9616b5cd2bdf3e1d2d0330611387d639c1916100/eeprom-format.md#eeprom-structure):
