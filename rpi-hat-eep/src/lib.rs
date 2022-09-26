@@ -70,29 +70,55 @@ impl Eep {
         Eep { atoms }
     }
 
-    pub fn push(&mut self, mut atom: EepAtom) -> Result<(), String> {
-        match atom.atype {
-            EepAtomType::VendorInfo => {
-                if !self.atoms.is_empty() {
-                    return Err("Wrong order: vendor info".to_string());
+    pub fn push(&mut self, mut atom: EepAtom) -> Result<(), EepError> {
+        if self.atoms.len() > u16::MAX as usize + 1 {
+            return Err(EepError(format!(
+                "Too many atoms: {} (max {})",
+                self.atoms.len(),
+                u16::MAX as usize + 1
+            )));
+        }
+        match self.atoms.len() {
+            0 => {
+                if atom.atype != EepAtomType::VendorInfo {
+                    return Err(EepError(format!(
+                        "Wrong atom order: Got `{}`, expected {}",
+                        atom.atype,
+                        EepAtomType::VendorInfo
+                    )));
                 }
             }
-            EepAtomType::GpioMap => {
-                if self.atoms.len() != 1 {
-                    return Err("Wrong order: gpio map".to_string());
+            1 => {
+                if atom.atype != EepAtomType::GpioMap {
+                    return Err(EepError(format!(
+                        "Wrong atom order: Got `{}`, expected {}",
+                        atom.atype,
+                        EepAtomType::GpioMap
+                    )));
                 }
             }
-            EepAtomType::LinuxDTB => {
-                if self.atoms.len() != 2 {
-                    return Err("Wrong order: dtb".to_string());
+            2 => {
+                if atom.atype != EepAtomType::LinuxDTB && atom.atype != EepAtomType::ManufCustomData
+                {
+                    return Err(EepError(format!(
+                        "Wrong atom order: Got `{}`, expected {} or {}",
+                        atom.atype,
+                        EepAtomType::LinuxDTB,
+                        EepAtomType::ManufCustomData
+                    )));
                 }
             }
-            EepAtomType::ManufCustomData => {
-                if self.atoms.len() < 2 {
-                    return Err("Wrong order: custom".to_string());
+            _ => {
+                if atom.atype != EepAtomType::ManufCustomData {
+                    return Err(EepError(format!(
+                        "Wrong atom order: Got `{}`, expected {}",
+                        atom.atype,
+                        EepAtomType::ManufCustomData
+                    )));
                 }
             }
         }
+
         atom.count = self.atoms.len() as u16;
         self.atoms.push(atom);
         Ok(())
@@ -178,7 +204,7 @@ impl ToBytes for EepAtomData {
 /// ```
 /// The enume does not define any value for invalid or reserved types. Any value not defined by this
 /// enum is treated as an invalid/error.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum EepAtomType {
     VendorInfo = 0x0001,
