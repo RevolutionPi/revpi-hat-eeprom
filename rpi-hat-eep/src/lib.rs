@@ -187,6 +187,21 @@ pub enum EepAtomType {
     ManufCustomData = 0x0004,
 }
 
+impl std::fmt::Display for EepAtomType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                EepAtomType::VendorInfo => "vendor info",
+                EepAtomType::GpioMap => "GPIO map",
+                EepAtomType::LinuxDTB => "Linux device tree blob",
+                EepAtomType::ManufCustomData => "manufacturer custom data",
+            }
+        )
+    }
+}
+
 /// This struct implements the Atom Structure
 ///
 /// [Atom Structure](https://github.com/raspberrypi/hats/blob/9616b5cd2bdf3e1d2d0330611387d639c1916100/eeprom-format.md#atom-structure):
