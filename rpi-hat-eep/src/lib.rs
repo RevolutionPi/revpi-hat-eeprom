@@ -244,7 +244,8 @@ impl std::fmt::Display for EepAtomType {
 pub struct EepAtom {
     /// The Atom Type as defined by [`EepAtomType`]
     atype: EepAtomType,
-    /// The atom count (ATOM1...ATOMn). It is the same as the index of the Atom in the [`Eep`] atoms vector +1
+    /// The atom count (ATOM1...ATOMn). It is the same as the index of the Atom in the [`Eep`] atoms
+    /// vector. So ATOM1 has count = 0, ATOM2 has count = 1, ..., ATOMn has count = n - 1
     count: u16,
     /// The actual Atom data
     data: EepAtomData,
