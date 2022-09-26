@@ -67,47 +67,6 @@ fn test_parse_prefixed_int() {
     );
 }
 
-/// Parse and validate a string for a date of the format YYYY-MM-DD (ISO8601/RFC3339).
-///
-/// Parse a string of the form YYYY-MM-DD (ISO8601/RFC3339) and return a
-/// chrono::NaiveDate struct.
-///
-/// # EXAMPLES
-/// ```
-/// assert_eq!(parse_date_iso8601("2022-03-15"), Ok(chrono::NaiveDate::from_ymd(2022, 3, 15)));
-/// ```
-fn parse_date_iso8601(src: &str) -> Result<chrono::NaiveDate, String> {
-    let date = NaiveDate::parse_from_str(src, "%F");
-    match date {
-        Ok(date) => Ok(date),
-        Err(e) => Err(format!("{e}")),
-    }
-}
-
-#[test]
-fn test_parse_date_rfc3339() {
-    assert_eq!(
-        parse_date_iso8601("2022-03-15"),
-        Ok(NaiveDate::from_ymd(2022, 3, 15))
-    );
-    assert_eq!(
-        parse_date_iso8601("2022-3-15"),
-        Ok(NaiveDate::from_ymd(2022, 3, 15))
-    );
-    assert_eq!(
-        parse_date_iso8601("2O22-03-15"),
-        Err("input contains invalid characters".to_string())
-    );
-    assert_eq!(
-        parse_date_iso8601("2022-030-15"),
-        Err("input contains invalid characters".to_string())
-    );
-    assert_eq!(
-        parse_date_iso8601("2022-13-15"),
-        Err("input is out of range".to_string())
-    );
-}
-
 fn calc_uuid(pid: u16, pver: u16, prev: u16, serial: u32) -> uuid::Uuid {
     let mut bytes: Vec<u8> = Vec::with_capacity(10);
     bytes.extend_from_slice(&u16::to_le_bytes(pid));
@@ -171,7 +130,7 @@ pub struct Cli {
     #[clap(long, parse(try_from_str = parse_prefixed_int))]
     pub serial: u32,
     /// The end test date for the device. In the format YYYY-MM-DD (ISO8601/RFC3339). If omitted the current date is used.
-    #[clap(long, parse(try_from_str = parse_date_iso8601))]
+    #[clap(long)]
     pub edate: Option<chrono::NaiveDate>,
     /// The (first) mac address of the device.
     #[clap(long)]
