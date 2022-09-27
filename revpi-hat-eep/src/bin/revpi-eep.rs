@@ -131,9 +131,10 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 pub struct Cli {
-    /// The serial number for the device.
+    /// The serial number for the device. It is mandatory if the serial is not included in the
+    /// config file. This option will override the serial from the config file.
     #[clap(long, parse(try_from_str = parse_prefixed_int))]
-    pub serial: u32,
+    pub serial: Option<u32>,
     /// The end test date for the device. In the format YYYY-MM-DD (ISO8601/RFC3339). If omitted the current date is used.
     #[clap(long)]
     pub edate: Option<NaiveDate>,
@@ -205,12 +206,29 @@ fn main() {
         }
     };
 
+    let serial = if let Some(serial_cli) = cli.serial {
+        if let Some(serial_config) = config.serial {
+            eprintln!(
+                "WARNING: Overriding serial from the config file (`{}`) \
+                with the serial from the program arguments (`{}`).",
+                serial_config,
+                serial_cli
+            );
+        }
+        serial_cli
+    } else if let Some(serial_config) = config.serial {
+        serial_config
+    } else {
+        eprintln!("ERROR: The `serial` was neither specified as argument nor in the config file.");
+        process::exit(1);
+    };
+
     let edate = match cli.edate {
         Some(edate) => edate,
         None => chrono::Local::today().naive_local(),
     };
 
-    config.serial = Some(cli.serial);
+    config.serial = Some(serial);
     config.edate = Some(edate);
     config.mac = Some(cli.mac);
 
