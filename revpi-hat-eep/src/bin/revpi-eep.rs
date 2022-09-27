@@ -245,14 +245,11 @@ fn main() {
         }
     };
 
-    match output_file.write_all(&buf) {
-        Ok(x) => x,
-        Err(e) => {
-            eprintln!(
-                "ERROR: Can't write data to the output file: `{}': {e}",
-                cli.outfile_name.to_string_lossy()
-            );
-            process::exit(1);
-        }
+    if let Err(e) = output_file.write_all(&buf) {
+        eprintln!(
+            "ERROR: Can't write data to the output file: `{}': {e}",
+            cli.outfile_name.to_string_lossy()
+        );
+        process::exit(1);
     }
 }
