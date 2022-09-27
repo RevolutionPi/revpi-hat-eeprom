@@ -135,7 +135,8 @@ pub struct Cli {
     /// config file. This option will override the serial from the config file.
     #[clap(long, parse(try_from_str = parse_prefixed_int))]
     pub serial: Option<u32>,
-    /// The end test date for the device. In the format YYYY-MM-DD (ISO8601/RFC3339). If omitted the current date is used.
+    /// The end test date for the device. In the format YYYY-MM-DD (ISO8601/RFC3339). If omitted the
+    /// current date is used. This option will override a given edate attribute from the config file.
     #[clap(long)]
     pub edate: Option<NaiveDate>,
     /// The (first) mac address of the device.
@@ -223,9 +224,20 @@ fn main() {
         process::exit(1);
     };
 
-    let edate = match cli.edate {
-        Some(edate) => edate,
-        None => chrono::Local::today().naive_local(),
+    let edate = if let Some(edate_cli) = cli.edate {
+        if let Some(edate_config) = config.edate {
+            eprintln!(
+                "WARNING: Overriding edate from the config file (`{}`) \
+                with the edate from the program arguments (`{}`).",
+                edate_config,
+                edate_cli
+            )
+        }
+        edate_cli
+    } else if let Some(edate_config) = config.edate {
+        edate_config
+    } else {
+        chrono::Local::today().naive_local()
     };
 
     config.serial = Some(serial);
