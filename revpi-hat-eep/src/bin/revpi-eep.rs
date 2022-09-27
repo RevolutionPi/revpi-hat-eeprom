@@ -139,9 +139,10 @@ pub struct Cli {
     /// current date is used. This option will override a given edate attribute from the config file.
     #[clap(long)]
     pub edate: Option<NaiveDate>,
-    /// The (first) mac address of the device.
+    /// The (first) mac address of the device. It is mandatory if the mac is not included in the
+    /// config file. This option will override the mac from the config file.
     #[clap(long)]
-    pub mac: MacAddress,
+    pub mac: Option<MacAddress>,
     /// Full json configuration export file name. The full json configuration includes also the
     /// serial, edate and mac.
     #[clap(long, value_parser, value_name = "EXPORT_CONFIG")]
@@ -240,9 +241,26 @@ fn main() {
         chrono::Local::today().naive_local()
     };
 
+    let mac = if let Some(mac_cli) =  cli.mac {
+        if let Some(mac_config) = config.mac {
+            eprintln!(
+                "WARNING: Overriding mac from the config file (`{}`) \
+                with the mac from the program arguments (`{}`).",
+                mac_config.to_hex_string(),
+                mac_cli.to_hex_string()
+            );
+        }
+        mac_cli
+    } else if let Some(mac_config) = config.mac {
+        mac_config
+    } else {
+        eprintln!("ERROR: The `mac` was neither specified as argument nor in the config file.");
+        process::exit(1);
+    };
+
     config.serial = Some(serial);
     config.edate = Some(edate);
-    config.mac = Some(cli.mac);
+    config.mac = Some(mac);
 
     if let Some(export_path) = cli.export {
         export_config(&config, export_path)
