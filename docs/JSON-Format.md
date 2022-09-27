@@ -55,7 +55,7 @@ All fields are mandatory.
 | Field     | JSON Datatype             | Range       | Description | Example  |
 |:----------|:--------------------------|:------------|:------------|:---------|
 | version   | number                    | u16         | Version of the EEPROM format | 1 |
-| vstr      | string                    | 255&#160;chars | Vendor of the device | Kunbus&#160;GmbH  |
+| vstr      | string                    | 255&#160;chars | Vendor of the device | KUNBUS&#160;GmbH  |
 | pstr      | string                    | 255&#160;chars | Product name         | RevPi&#160;MiniXL |
 | pid       | number                    | u16         | Product identification number | 42 |
 | prev      | number                    | u16         | Product revision     | 3 |
@@ -160,20 +160,19 @@ Own EEPROM definitions in JSON can be validated either by using it directly with
 To validate own JSON files for the HAT EEPROM tool, the python tool and library `jsonschema` can be used together with the provided schema file for validation.
 Install `jsonschema` from the command line with pip (python installation required):
 
-```
-$ pip install jsonschema
+```text
+pip install jsonschema
 ```
 
-There are also libraries for other languages than python, check out https://json-schema.org/implementations.html for more.
+There are also libraries for other languages than python, check out <https://json-schema.org/implementations.html> for more.
 
 After jsonschema is installed, it can be called from the commandline with your json and the schema file:
 
-```
+```text
 jsonschema --instance own.json eep.schema
 ```
 
 > #### Warning
 > The schema doesn't restrict multiple definitions of the same GPIO in `gpiobanks.gpios`.  Defining two GPIO entries with the same GPIO number but different settings for `fsel` and/or `pull` will not result in a validation error. Only if both GPIO entries are identical, the validation will fail.
 
-
-¹ https://github.com/raspberrypi/hats/blob/master/eeprom-format.md
+¹ <https://github.com/raspberrypi/hats/blob/master/eeprom-format.md>
