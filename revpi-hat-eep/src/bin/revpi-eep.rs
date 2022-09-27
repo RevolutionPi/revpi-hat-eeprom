@@ -5,7 +5,7 @@ use chrono::NaiveDate;
 use clap::Parser;
 use eui48::MacAddress;
 use revpi_hat_eep::RevPiHatEeprom;
-use rpi_hat_eep::{gpio_map, EepAtom, EepAtomCustomData, ToBytes, Eep};
+use rpi_hat_eep::{gpio_map, Eep, EepAtom, EepAtomCustomData, ToBytes};
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
@@ -77,12 +77,17 @@ fn calc_uuid(pid: u16, pver: u16, prev: u16, serial: u32) -> uuid::Uuid {
     uuid::Builder::from_md5_bytes(*digest).into_uuid()
 }
 
-fn create_rpi_eep(
-    config: RevPiHatEeprom,
-    serial: u32,
-    edate: NaiveDate,
-    mac: MacAddress,
-) -> Result<rpi_hat_eep::Eep, Box<dyn std::error::Error>> {
+fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn std::error::Error>> {
+    let serial = config
+        .serial
+        .expect("BUG: Missing serial in RevPiHatEeprom configuration");
+    let edate = config
+        .edate
+        .expect("BUG: Missing end test date in RevPiHatEeprom configuration");
+    let mac = config
+        .mac
+        .expect("BUG: Missing mac address in RevPiHatEeprom confirguration");
+
     let uuid = calc_uuid(config.pid, config.pver, config.prev, serial);
     let vendor_data = rpi_hat_eep::EepAtomVendorData::new(
         uuid,
@@ -131,16 +136,48 @@ pub struct Cli {
     pub serial: u32,
     /// The end test date for the device. In the format YYYY-MM-DD (ISO8601/RFC3339). If omitted the current date is used.
     #[clap(long)]
-    pub edate: Option<chrono::NaiveDate>,
+    pub edate: Option<NaiveDate>,
     /// The (first) mac address of the device.
     #[clap(long)]
     pub mac: MacAddress,
+    /// Full json configuration export file name. The full json configuration includes also the
+    /// serial, edate and mac.
+    #[clap(long, value_parser, value_name = "EXPORT_CONFIG")]
+    pub export: Option<PathBuf>,
     /// Configuration file in JSON format
     #[clap(value_parser, value_name = "CONFIG")]
     pub config: PathBuf,
     /// Output file name
     #[clap(value_parser, value_name = "OUTPUT", default_value = "out.eep")]
     pub outfile_name: PathBuf,
+}
+
+fn export_config(config: &RevPiHatEeprom, export_path: PathBuf) {
+    let json = serde_json::to_string(config)
+        .expect("BUG: Can't create (full) json from RevPiHatEeprom config");
+    let mut export_file = match OpenOptions::new()
+        .read(false)
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open(&export_path)
+    {
+        Ok(file) => file,
+        Err(e) => {
+            eprintln!(
+                "ERROR: Can't open json export file: `{}': {e}",
+                export_path.to_string_lossy()
+            );
+            process::exit(1);
+        }
+    };
+    if let Err(e) = export_file.write_all(json.as_bytes()) {
+        eprintln!(
+            "ERROR: Can't write to file `{}`: {e}",
+            export_path.to_string_lossy()
+        );
+        process::exit(1);
+    }
 }
 
 fn main() {
@@ -157,7 +194,7 @@ fn main() {
         }
     };
 
-    let config = match revpi_hat_eep::parse_config(&config) {
+    let mut config = match revpi_hat_eep::parse_config(&config) {
         Ok(config) => config,
         Err(e) => {
             eprintln!(
@@ -173,7 +210,15 @@ fn main() {
         None => chrono::Local::today().naive_local(),
     };
 
-    let eep = match create_rpi_eep(config, cli.serial, edate, cli.mac) {
+    config.serial = Some(cli.serial);
+    config.edate = Some(edate);
+    config.mac = Some(cli.mac);
+
+    if let Some(export_path) = cli.export {
+        export_config(&config, export_path)
+    };
+
+    let eep = match create_rpi_eep(config) {
         Ok(eep) => eep,
         Err(e) => {
             eprintln!("Error: Can't create EEP: {e}");
