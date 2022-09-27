@@ -61,6 +61,9 @@ All fields are mandatory.
 | prev      | number                    | u16         | Product revision     | 3 |
 | pver      | number                    | u16         | Product version      | 21 |
 | dtstr     | string                    | 255&#160;chars | Name of devicetree blob for this device | revpi-example-2022 |
+| serial    | number                    | u32         | Serial number of the device | 39485 |
+| edate     | string                    | YYYY-MM-DD  | The date of the end of line test | 2022-09-27 |
+| mac       | string                    | XX-XX-XX-XX-XX-XX | The first mac address of the device (`:` can be used instead of `-`) | C8-3E-A7-DE-AD-BE |
 | gpiobanks | array of gpiobank objects |             | List of gpiobanks to configure (only bank0 supported at the moment) | |
 
 ### GPIOBanks object
