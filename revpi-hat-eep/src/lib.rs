@@ -4,6 +4,8 @@
 pub mod gpio;
 
 use self::gpio::GpioBank;
+use chrono::NaiveDate;
+use eui48::MacAddress;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
@@ -77,6 +79,12 @@ pub struct RevPiHatEeprom {
     pub pver: u16,
     /// The device tree overlay name, see [Linux Device Tree (Blob) Atom](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#linux-device-tree-blob-atom)
     pub dtstr: String,
+    /// The serial number which is also printed on the casing of the RevPi, see [Serial](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#1-serial)
+    pub serial: Option<u32>,
+    /// The end test date represents the current date as of when the end of line test is/was done, see [Endtest Date](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#3-endtest-date)
+    pub edate: Option<NaiveDate>,
+    /// The first mac address of the device, see [MAC Address](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#5-mac-address)
+    pub mac: Option<MacAddress>,
     /// The configuration of the first gpiobank, see [GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
     pub gpiobanks: Vec<GpioBank>,
 }
