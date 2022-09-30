@@ -133,7 +133,7 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
 pub struct Cli {
     /// The serial number for the device. It is mandatory if the serial is not included in the
     /// config file. This option will override the serial from the config file.
-    #[clap(long, parse(try_from_str = parse_prefixed_int))]
+    #[clap(long, value_parser = parse_prefixed_int::<u32>)]
     pub serial: Option<u32>,
     /// The end test date for the device. In the format YYYY-MM-DD (ISO8601/RFC3339). If omitted the
     /// current date is used. This option will override a given edate attribute from the config file.

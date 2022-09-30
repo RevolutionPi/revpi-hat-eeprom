@@ -13,7 +13,7 @@ authors = ["KUNBUS GmbH <support@kunbus.com>"]
 [dependencies]
 anyhow = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
-clap = { version = "3.2", features = ["derive"] }
+clap = { version = "4.0", features = ["derive"] }
 eui48 = { version = "1.1", features = ["serde"] }
 md5 = "0.7"
 num = "0.4"
