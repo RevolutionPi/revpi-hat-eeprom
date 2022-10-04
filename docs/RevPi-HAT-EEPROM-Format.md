@@ -32,8 +32,9 @@
 
 | Version | Date       | Changes |
 |---------|------------|---------|
-| 1.0     | 2022-06-10 | Initial release
-| 1.1     | 2022-09-06 | On strings no `\0` termination is needed. Restructure the document. Move the _Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION_ to the Appendix.
+| 1.0     | 2022-06-10 | Initial release |
+| 1.1     | 2022-09-06 | On strings no `\0` termination is needed. Restructure the document. Move the _Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION_ to the Appendix. |
+| 1.2     | 2022-10-04 | Update the description of the product version |
 
 ## RevPi Hat EEPROM Format Specification (v1)
 
@@ -129,7 +130,7 @@ PR100302 RevPi Connect+ - 8GB → 302 → `0x012e`
 
 #### Product Version (pver)
 
-The product version is a 16-bit unsigned integer. It reflects the customer visible version which is lasered to the front of the device. As this attribute is a 16-bit unsigned integer and the customer visible version is currently a number is one decimal place. We multiply this number with 100 provide the value as an unsigned 16-bit value.
+The product version is a 16-bit unsigned integer. It reflects the customer visible version which is lasered to the front of the device. The product version consists of the major number before and a minor number after the point. In the 16-bit unsigned integer the last two base 10 digits are used for the minor number and the rest is used for the major.
 
 ##### Data Type <!-- omit in toc -->
 16-bit unsigned integer
@@ -141,7 +142,7 @@ The product version is a 16-bit unsigned integer. It reflects the customer visib
 Base 16 (hex) representation as ASCII string.
 
 ##### Example(s) <!-- omit in toc -->
-1.2 → 1.2 * 100 → 120 → `0x0078`
+1.2 → major(1), minor(2) → major * 100 + minor → 102 → `0x0066`
 
 #### Vendor String (vstr)
 
