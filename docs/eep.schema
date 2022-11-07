@@ -104,6 +104,10 @@
                                 "pull": {
                                     "description": "Pull resistor setting for this gpio",
                                     "enum": [ "default", "up", "down", "none" ]
+                                },
+                                "comment": {
+                                    "description": "An optional comment describing the function of this gpio",
+                                    "type": "string"
                                 }
                             }
                         }

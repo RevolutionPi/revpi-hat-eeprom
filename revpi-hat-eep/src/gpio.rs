@@ -231,12 +231,13 @@ impl From<GpioPull> for gpio_map::GpioPull {
 /// leavs only the first 28 gpios. The gpios 0 and 1 are used for the HAT EEPROM
 /// and should not be changed. The gpio bank validation will not allow to modify
 /// the gpios 0 and 1 also the gpios higher then 27.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct GpioPin {
     gpio: u8,
     fsel: GpioFsel,
     pull: GpioPull,
+    comment: Option<String>,
 }
 
 /// This struct represents the GPIO configuration of the HAT EEPROM
