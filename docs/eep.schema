@@ -95,7 +95,7 @@
                                     "description": "GPIO or pin number",
                                     "type": "integer",
                                     "minimum": 2,
-                                    "maximum": 27
+                                    "maximum": 45
                                 },
                                 "fsel": {
                                     "description": "Alternate function setting for this gpio",
