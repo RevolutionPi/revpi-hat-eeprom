@@ -72,7 +72,7 @@
                 "properties": {
                     "drive": {
                         "description": "Drive strength of each pin on this gpiobank",
-                        "enum": [ "2mA", "4mA", "6mA", "8mA", "10mA", "12mA", "14mA", "16mA" ]
+                        "enum": [ "default", "2mA", "4mA", "6mA", "8mA", "10mA", "12mA", "14mA", "16mA" ]
                     },
                     "slew": {
                         "description": "Slew rate setting for each pin on this gpiobank",
