@@ -238,7 +238,7 @@ fn main() {
     } else if let Some(edate_config) = config.edate {
         edate_config
     } else {
-        chrono::Local::today().naive_local()
+        chrono::Local::now().date_naive()
     };
 
     let mac = if let Some(mac_cli) =  cli.mac {
