@@ -237,7 +237,8 @@ pub struct GpioPin {
     gpio: u8,
     fsel: GpioFsel,
     pull: GpioPull,
-    comment: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    comment: Option<Vec<String>>,
 }
 
 /// This struct represents the GPIO configuration of the HAT EEPROM

@@ -106,8 +106,11 @@
                                     "enum": [ "default", "up", "down", "none" ]
                                 },
                                 "comment": {
-                                    "description": "An optional comment describing the function of this gpio",
-                                    "type": "string"
+                                    "type": "array",
+                                    "items": {
+                                        "description": "An optional comment describing the function of this gpio",
+                                        "type": "string"
+                                    }
                                 }
                             }
                         }

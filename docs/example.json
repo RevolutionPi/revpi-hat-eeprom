@@ -26,7 +26,10 @@
                     "gpio": 4,
                     "fsel": "alt1",
                     "pull": "up",
-                    "comment": "This configures the I2C1 SCL"
+                    "comment": [
+                        "This configures the I2C1 SCL",
+                        "external pull-up missing"
+                    ]
                 }
             ]
         }
