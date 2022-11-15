@@ -23,6 +23,7 @@ impl std::fmt::Display for GpioErrorType {
 #[derive(Debug, PartialEq)]
 pub struct GpioError {
     gpio_no: usize,
+    bank: GpioBank,
     etype: GpioErrorType,
 }
 
@@ -30,7 +31,21 @@ impl std::error::Error for GpioError {}
 
 impl std::fmt::Display for GpioError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "gpio: {}: {}", self.gpio_no, self.etype)
+        write!(f, "gpio: {} ({}): {}", self.gpio_no, self.bank, self.etype)
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GpioBank {
+    Bank0,
+}
+
+impl std::fmt::Display for GpioBank {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let bank = match self {
+            GpioBank::Bank0 => "Bank0",
+        };
+        write!(f, "{}", bank)
     }
 }
 
@@ -198,6 +213,7 @@ fn test_gpio_pin() {
 /// ```
 #[derive(Debug)]
 pub struct EepAtomGpioMapData {
+    bank: GpioBank,
     drive: GpioDrive,
     slew: GpioSlew,
     hysteresis: GpioHysteresis,
@@ -207,17 +223,22 @@ pub struct EepAtomGpioMapData {
 
 impl EepAtomGpioMapData {
     pub fn new(
+        bank: GpioBank,
         drive: GpioDrive,
         slew: GpioSlew,
         hysteresis: GpioHysteresis,
         back_power: GpioBackPower,
     ) -> EepAtomGpioMapData {
+        let gpios = match bank {
+            GpioBank::Bank0 => vec![GpioPin::default(); BANK0_GPIOS],
+        };
         EepAtomGpioMapData {
+            bank,
             drive,
             slew,
             hysteresis,
             back_power,
-            gpios: vec![GpioPin::default(); BANK0_GPIOS],
+            gpios,
         }
     }
 
@@ -225,6 +246,7 @@ impl EepAtomGpioMapData {
         if n >= self.gpios.len() {
             return Err(GpioError {
                 gpio_no: n,
+                bank: self.bank,
                 etype: GpioErrorType::OutOfBound,
             });
         }
@@ -258,6 +280,7 @@ impl ToBytes for EepAtomGpioMapData {
 #[test]
 fn test_eep_atom_gpio_map() {
     let mut gpio_map = EepAtomGpioMapData::new(
+        GpioBank::Bank0,
         GpioDrive::Default,
         GpioSlew::Default,
         GpioHysteresis::Default,
@@ -309,6 +332,7 @@ fn test_eep_atom_gpio_map() {
         ),
         Err(GpioError {
             gpio_no: BANK0_GPIOS,
+            bank: GpioBank::Bank0,
             etype: GpioErrorType::OutOfBound
         })
     );

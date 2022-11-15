@@ -295,6 +295,7 @@ impl TryFrom<GpioBank> for gpio_map::EepAtomGpioMapData {
 
     fn try_from(bank: GpioBank) -> Result<Self, Self::Error> {
         let mut gpio_map = gpio_map::EepAtomGpioMapData::new(
+            gpio_map::GpioBank::Bank0,
             bank.drive.into(),
             bank.slew.into(),
             bank.hysteresis.into(),
