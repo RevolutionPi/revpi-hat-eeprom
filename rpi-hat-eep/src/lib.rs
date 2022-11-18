@@ -78,45 +78,62 @@ impl Eep {
                 u16::MAX as usize + 1
             )));
         }
-        match self.atoms.len() {
-            0 => {
-                if atom.atype != EepAtomType::VendorInfo {
-                    return Err(EepError(format!(
-                        "Wrong atom order: Got `{}`, expected {}",
-                        atom.atype,
-                        EepAtomType::VendorInfo
-                    )));
-                }
-            }
-            1 => {
-                if atom.atype != EepAtomType::GpioBank0Map {
+
+        if self.atoms.is_empty() && atom.atype != EepAtomType::VendorInfo {
+            return Err(EepError(format!(
+                "Wrong atom order: Got `{}`, expected {}",
+                atom.atype,
+                EepAtomType::VendorInfo
+            )));
+        };
+
+        let last = self
+            .atoms
+            .last()
+            .expect("BUG: The Atoms vector should not be empty at this point.");
+
+        match last.atype {
+            EepAtomType::VendorInfo => match atom.atype {
+                EepAtomType::GpioBank0Map => (),
+                _ => {
                     return Err(EepError(format!(
                         "Wrong atom order: Got `{}`, expected {}",
                         atom.atype,
                         EepAtomType::GpioBank0Map
                     )));
                 }
-            }
-            2 => {
-                if atom.atype != EepAtomType::LinuxDTB && atom.atype != EepAtomType::ManufCustomData
-                {
+            },
+            EepAtomType::GpioBank0Map => match atom.atype {
+                EepAtomType::LinuxDTB | EepAtomType::ManufCustomData => (),
+                _ => {
                     return Err(EepError(format!(
                         "Wrong atom order: Got `{}`, expected {} or {}",
                         atom.atype,
                         EepAtomType::LinuxDTB,
-                        EepAtomType::ManufCustomData
+                        EepAtomType::ManufCustomData,
                     )));
                 }
-            }
-            _ => {
-                if atom.atype != EepAtomType::ManufCustomData {
+            },
+            EepAtomType::LinuxDTB => match atom.atype {
+                EepAtomType::ManufCustomData => (),
+                _ => {
                     return Err(EepError(format!(
                         "Wrong atom order: Got `{}`, expected {}",
                         atom.atype,
-                        EepAtomType::ManufCustomData
+                        EepAtomType::ManufCustomData,
                     )));
                 }
-            }
+            },
+            EepAtomType::ManufCustomData => match atom.atype {
+                EepAtomType::ManufCustomData => (),
+                _ => {
+                    return Err(EepError(format!(
+                        "Wrong atom order: Got `{}`, expected {}",
+                        atom.atype,
+                        EepAtomType::ManufCustomData,
+                    )));
+                }
+            },
         }
 
         atom.count = self.atoms.len() as u16;
