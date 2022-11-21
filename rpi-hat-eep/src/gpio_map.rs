@@ -22,7 +22,7 @@ impl std::fmt::Display for GpioErrorType {
 
 #[derive(Debug, PartialEq)]
 pub struct GpioError {
-    gpio_nr: usize,
+    gpio_no: usize,
     etype: GpioErrorType,
 }
 
@@ -30,7 +30,7 @@ impl std::error::Error for GpioError {}
 
 impl std::fmt::Display for GpioError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "gpio: {}: {}", self.gpio_nr, self.etype)
+        write!(f, "gpio: {}: {}", self.gpio_no, self.etype)
     }
 }
 
@@ -224,7 +224,7 @@ impl EepAtomGpioMapData {
     pub fn set(&mut self, n: usize, gpio: GpioPin) -> Result<(), GpioError> {
         if n >= self.gpios.len() {
             return Err(GpioError {
-                gpio_nr: n,
+                gpio_no: n,
                 etype: GpioErrorType::OutOfBound,
             });
         }
@@ -308,7 +308,7 @@ fn test_eep_atom_gpio_map() {
             }
         ),
         Err(GpioError {
-            gpio_nr: MAX_GPIOS,
+            gpio_no: MAX_GPIOS,
             etype: GpioErrorType::OutOfBound
         })
     );
