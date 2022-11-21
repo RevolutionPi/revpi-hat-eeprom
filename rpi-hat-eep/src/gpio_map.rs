@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
-const MAX_GPIOS: usize = 28;
+pub const BANK0_GPIOS: usize = 28;
 
 use crate::ToBytes;
 use num_derive::FromPrimitive;
@@ -217,7 +217,7 @@ impl EepAtomGpioMapData {
             slew,
             hysteresis,
             back_power,
-            gpios: vec![GpioPin::default(); MAX_GPIOS],
+            gpios: vec![GpioPin::default(); BANK0_GPIOS],
         }
     }
 
@@ -236,7 +236,7 @@ impl EepAtomGpioMapData {
 impl ToBytes for EepAtomGpioMapData {
     fn len(&self) -> usize {
         // 1 byte drive_bank; 1 byte power; 28 bytes gpio pins configuration
-        1 + 1 + 28
+        1 + 1 + self.gpios.len()
     }
 
     fn to_bytes(&self, buf: &mut Vec<u8>) {
@@ -289,7 +289,7 @@ fn test_eep_atom_gpio_map() {
     );
     assert_eq!(
         gpio_map.set(
-            MAX_GPIOS - 1,
+            BANK0_GPIOS - 1,
             GpioPin {
                 fsel: GpioFsel::Alt5,
                 pull: GpioPull::NoPull,
@@ -300,7 +300,7 @@ fn test_eep_atom_gpio_map() {
     );
     assert_eq!(
         gpio_map.set(
-            MAX_GPIOS,
+            BANK0_GPIOS,
             GpioPin {
                 fsel: GpioFsel::Alt0,
                 pull: GpioPull::Up,
@@ -308,7 +308,7 @@ fn test_eep_atom_gpio_map() {
             }
         ),
         Err(GpioError {
-            gpio_no: MAX_GPIOS,
+            gpio_no: BANK0_GPIOS,
             etype: GpioErrorType::OutOfBound
         })
     );

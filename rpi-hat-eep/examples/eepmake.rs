@@ -62,7 +62,8 @@ fn gpio_map_atom(config: &EepConfig) -> gpio_map::EepAtomGpioMapData {
             gpio_map::GpioBackPower::None
         }
     };
-    let mut gpio_map = gpio_map::EepAtomGpioMapData::new(drive, slew, hyst, power);
+    let mut gpio_map =
+        gpio_map::EepAtomGpioMapData::new(drive, slew, hyst, power);
 
     for gpio in &config.gpios {
         gpio_map.set(gpio.0 as usize, gpio.1.clone()).unwrap();
