@@ -13,6 +13,12 @@
             "minimum": 0,
             "maximum": 65535
         },
+        "eeprom_data_version": {
+            "description": "Version of the EEPROM content",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
         "vstr": {
             "description": "Vendor string",
             "type": "string",

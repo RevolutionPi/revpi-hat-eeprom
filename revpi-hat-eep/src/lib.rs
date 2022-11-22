@@ -30,6 +30,7 @@ impl std::fmt::Display for ValidationError {
 /// ```json
 /// {
 ///     "version": 1,
+///     "eeprom_data_version": 3,
 ///     "vstr": "KUNBUS GmbH",
 ///     "pstr": "RevPi ExampleDevice 8GB",
 ///     "pid": 666,
@@ -88,6 +89,8 @@ impl std::fmt::Display for ValidationError {
 pub struct RevPiHatEeprom {
     /// The version of the used [RevPi HAT EEPROM Format](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#0-format-version)
     pub version: u16,
+    /// The version of the HAT EEPROM content (16 bits) see [EEPROM Data Version](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#6-eeprom-data-version)
+    pub eeprom_data_version: u16,
     /// The vendor string (max. 255 chars (bytes)), see [Vendor String](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#vendor-string-vstr)
     pub vstr: String,
     /// The product string (max. 255 chars (bytes)), see [Product String](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#product-string-pstr)

@@ -1,5 +1,6 @@
 {
     "version": 1,
+    "eeprom_data_version": 3,
     "vstr": "KUNBUS GmbH",
     "pstr": "RevPi ExampleDevice 8GB",
     "pid": 666,

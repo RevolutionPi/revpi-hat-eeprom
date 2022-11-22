@@ -108,6 +108,9 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
     let data = EepAtomCustomData::new(config.version.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
+    let data = EepAtomCustomData::new(config.eeprom_data_version.to_string().into_bytes());
+    eep.push(EepAtom::new_custom(data))?;
+
     let data = EepAtomCustomData::new(serial.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
