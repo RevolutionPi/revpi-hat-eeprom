@@ -294,7 +294,7 @@ TBD
 
 #### (5) MAC Address
 
-This file represents the (first) MAC address for this device. If the device has more MAC addresses assigned they are derived from the first (this) MAC address. The MAC addresses are just incremented by 1 for every assigned MAC address.
+This attribute represents the (first) MAC address for this device. If the device has more MAC addresses assigned they are derived from the first (this) MAC address. The MAC addresses are just incremented by 1 for every assigned MAC address.
 
 ##### Data Type <!-- omit in toc -->
 17 character ASCII String
