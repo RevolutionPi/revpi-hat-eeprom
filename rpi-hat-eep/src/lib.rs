@@ -143,35 +143,48 @@ impl Eep {
                 }
             },
             EepAtomType::GpioBank0Map => match atom.atype {
-                EepAtomType::LinuxDTB | EepAtomType::ManufCustomData => (),
+                EepAtomType::LinuxDTB
+                | EepAtomType::ManufCustomData
+                | EepAtomType::GpioBank1Map => (),
                 _ => {
                     return Err(EepPushError::WrongAtomOrder {
                         atype: atom.atype,
                         prev: Some(last.atype),
-                        expected: vec![EepAtomType::LinuxDTB, EepAtomType::ManufCustomData],
+                        expected: vec![
+                            EepAtomType::LinuxDTB,
+                            EepAtomType::ManufCustomData,
+                            EepAtomType::GpioBank1Map,
+                        ],
                     });
                 }
             },
             EepAtomType::LinuxDTB => match atom.atype {
-                EepAtomType::ManufCustomData => (),
+                EepAtomType::ManufCustomData | EepAtomType::GpioBank1Map => (),
                 _ => {
                     return Err(EepPushError::WrongAtomOrder {
                         atype: atom.atype,
                         prev: Some(last.atype),
-                        expected: vec![EepAtomType::ManufCustomData],
+                        expected: vec![EepAtomType::ManufCustomData, EepAtomType::GpioBank1Map],
                     });
                 }
             },
             EepAtomType::ManufCustomData => match atom.atype {
-                EepAtomType::ManufCustomData => (),
+                EepAtomType::ManufCustomData | EepAtomType::GpioBank1Map => (),
                 _ => {
                     return Err(EepPushError::WrongAtomOrder {
                         atype: atom.atype,
                         prev: Some(last.atype),
-                        expected: vec![EepAtomType::ManufCustomData],
+                        expected: vec![EepAtomType::ManufCustomData, EepAtomType::GpioBank1Map],
                     });
                 }
             },
+            EepAtomType::GpioBank1Map => {
+                return Err(EepPushError::WrongAtomOrder {
+                    atype: atom.atype,
+                    prev: Some(last.atype),
+                    expected: Vec::new(),
+                });
+            }
         }
 
         atom.count = self.atoms.len() as u16;
@@ -224,6 +237,8 @@ pub enum EepAtomData {
     LinuxDTB(EepAtomLinuxDTBData),
     /// manufacturer custom data (0x0004, [`EepAtomType::ManufCustomData`])
     ManufCustomData(EepAtomCustomData),
+    /// GPIO (bank 1) map (0x0005, [`EepAtomType::GpioBank1Map`])
+    GpioBank1Map(gpio_map::EepAtomGpioMapData),
 }
 
 impl ToBytes for EepAtomData {
@@ -233,6 +248,7 @@ impl ToBytes for EepAtomData {
             EepAtomData::GpioBank0Map(data) => data.len(),
             EepAtomData::LinuxDTB(data) => data.len(),
             EepAtomData::ManufCustomData(data) => data.len(),
+            EepAtomData::GpioBank1Map(data) => data.len(),
         }
     }
     fn to_bytes(&self, buf: &mut Vec<u8>) {
@@ -241,6 +257,7 @@ impl ToBytes for EepAtomData {
             EepAtomData::GpioBank0Map(data) => data.to_bytes(buf),
             EepAtomData::LinuxDTB(data) => data.to_bytes(buf),
             EepAtomData::ManufCustomData(data) => data.to_bytes(buf),
+            EepAtomData::GpioBank1Map(data) => data.to_bytes(buf),
         };
     }
 }
@@ -254,7 +271,8 @@ impl ToBytes for EepAtomData {
 /// 0x0002 = GPIO (bank 0) map
 /// 0x0003 = Linux device tree blob
 /// 0x0004 = manufacturer custom data
-/// 0x0005-0xfffe = reserved for future use
+/// 0x0005 = GPIO (bank 1) map
+/// 0x0006-0xfffe = reserved for future use
 /// 0xffff = invalid
 /// ```
 /// The enume does not define any value for invalid or reserved types. Any value not defined by this
@@ -266,6 +284,7 @@ pub enum EepAtomType {
     GpioBank0Map = 0x0002,
     LinuxDTB = 0x0003,
     ManufCustomData = 0x0004,
+    GpioBank1Map = 0x0005,
 }
 
 impl std::fmt::Display for EepAtomType {
@@ -278,6 +297,7 @@ impl std::fmt::Display for EepAtomType {
                 EepAtomType::GpioBank0Map => "GPIO (bank 0) map",
                 EepAtomType::LinuxDTB => "Linux device tree blob",
                 EepAtomType::ManufCustomData => "manufacturer custom data",
+                EepAtomType::GpioBank1Map => "GPIO (bank 1) map",
             }
         )
     }
@@ -339,6 +359,14 @@ impl EepAtom {
             atype: EepAtomType::ManufCustomData,
             count: 0xffff,
             data: EepAtomData::ManufCustomData(data),
+        }
+    }
+
+    pub fn new_gpio_bank1_map(data: EepAtomGpioMapData) -> EepAtom {
+        EepAtom {
+            atype: EepAtomType::GpioBank1Map,
+            count: 1,
+            data: EepAtomData::GpioBank1Map(data),
         }
     }
 }

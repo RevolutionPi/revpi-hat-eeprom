@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
 pub const BANK0_GPIOS: usize = 28;
+pub const BANK1_GPIOS: usize = 18;
 
 use crate::ToBytes;
 use num_derive::FromPrimitive;
@@ -38,12 +39,14 @@ impl std::fmt::Display for GpioError {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum GpioBank {
     Bank0,
+    Bank1,
 }
 
 impl std::fmt::Display for GpioBank {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let bank = match self {
             GpioBank::Bank0 => "Bank0",
+            GpioBank::Bank1 => "Bank1",
         };
         write!(f, "{}", bank)
     }
@@ -231,6 +234,7 @@ impl EepAtomGpioMapData {
     ) -> EepAtomGpioMapData {
         let gpios = match bank {
             GpioBank::Bank0 => vec![GpioPin::default(); BANK0_GPIOS],
+            GpioBank::Bank1 => vec![GpioPin::default(); BANK1_GPIOS],
         };
         EepAtomGpioMapData {
             bank,
@@ -243,6 +247,19 @@ impl EepAtomGpioMapData {
     }
 
     pub fn set(&mut self, n: usize, gpio: GpioPin) -> Result<(), GpioError> {
+        let n = match self.bank {
+            GpioBank::Bank0 => n,
+            GpioBank::Bank1 => match n.checked_sub(BANK0_GPIOS) {
+                Some(n) => n,
+                None => {
+                    return Err(GpioError {
+                        gpio_no: n,
+                        bank: self.bank,
+                        etype: GpioErrorType::OutOfBound,
+                    })
+                }
+            },
+        };
         if n >= self.gpios.len() {
             return Err(GpioError {
                 gpio_no: n,
