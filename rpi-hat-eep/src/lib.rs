@@ -40,6 +40,49 @@ impl std::fmt::Display for EepError {
 
 impl std::error::Error for EepError {}
 
+#[derive(Debug)]
+pub enum EepPushError {
+    MaxAtomCountExceeded,
+    WrongAtomOrder {
+        atype: EepAtomType,
+        prev: Option<EepAtomType>,
+        expected: Vec<EepAtomType>,
+    },
+}
+
+impl std::fmt::Display for EepPushError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EepPushError::MaxAtomCountExceeded => {
+                write!(f, "The maximum Atom count {} was exceeded", u16::MAX)
+            }
+            EepPushError::WrongAtomOrder {
+                atype,
+                prev,
+                expected,
+            } => {
+                write!(f, "Wrong Atom type order: Got {};", atype)?;
+                if let Some(prev) = prev {
+                    write!(f, "previous Atom was {};", prev)?;
+                } else {
+                    write!(f, "this was the first Atom;")?;
+                }
+                if expected.is_empty() {
+                    write!(f, "not further Atoms were expected.")
+                } else {
+                    write!(f, "expected Atom types:")?;
+                    for t in expected {
+                        write!(f, " {}", t)?;
+                    }
+                    write!(f, ".")
+                }
+            }
+        }
+    }
+}
+
+impl std::error::Error for EepPushError {}
+
 /// This struct implemnts the EEPROM Structure
 ///
 /// [EEPROM Structure](https://github.com/raspberrypi/hats/blob/9616b5cd2bdf3e1d2d0330611387d639c1916100/eeprom-format.md#eeprom-structure):
@@ -70,21 +113,17 @@ impl Eep {
         Eep { atoms }
     }
 
-    pub fn push(&mut self, mut atom: EepAtom) -> Result<(), EepError> {
+    pub fn push(&mut self, mut atom: EepAtom) -> Result<(), EepPushError> {
         if self.atoms.len() > u16::MAX as usize + 1 {
-            return Err(EepError(format!(
-                "Too many atoms: {} (max {})",
-                self.atoms.len(),
-                u16::MAX as usize + 1
-            )));
+            return Err(EepPushError::MaxAtomCountExceeded);
         }
 
         if self.atoms.is_empty() && atom.atype != EepAtomType::VendorInfo {
-            return Err(EepError(format!(
-                "Wrong atom order: Got `{}`, expected {}",
-                atom.atype,
-                EepAtomType::VendorInfo
-            )));
+            return Err(EepPushError::WrongAtomOrder {
+                atype: atom.atype,
+                prev: None,
+                expected: vec![EepAtomType::VendorInfo],
+            });
         };
 
         let last = self
@@ -96,42 +135,41 @@ impl Eep {
             EepAtomType::VendorInfo => match atom.atype {
                 EepAtomType::GpioBank0Map => (),
                 _ => {
-                    return Err(EepError(format!(
-                        "Wrong atom order: Got `{}`, expected {}",
-                        atom.atype,
-                        EepAtomType::GpioBank0Map
-                    )));
+                    return Err(EepPushError::WrongAtomOrder {
+                        atype: atom.atype,
+                        prev: Some(last.atype),
+                        expected: vec![EepAtomType::GpioBank0Map],
+                    });
                 }
             },
             EepAtomType::GpioBank0Map => match atom.atype {
                 EepAtomType::LinuxDTB | EepAtomType::ManufCustomData => (),
                 _ => {
-                    return Err(EepError(format!(
-                        "Wrong atom order: Got `{}`, expected {} or {}",
-                        atom.atype,
-                        EepAtomType::LinuxDTB,
-                        EepAtomType::ManufCustomData,
-                    )));
+                    return Err(EepPushError::WrongAtomOrder {
+                        atype: atom.atype,
+                        prev: Some(last.atype),
+                        expected: vec![EepAtomType::LinuxDTB, EepAtomType::ManufCustomData],
+                    });
                 }
             },
             EepAtomType::LinuxDTB => match atom.atype {
                 EepAtomType::ManufCustomData => (),
                 _ => {
-                    return Err(EepError(format!(
-                        "Wrong atom order: Got `{}`, expected {}",
-                        atom.atype,
-                        EepAtomType::ManufCustomData,
-                    )));
+                    return Err(EepPushError::WrongAtomOrder {
+                        atype: atom.atype,
+                        prev: Some(last.atype),
+                        expected: vec![EepAtomType::ManufCustomData],
+                    });
                 }
             },
             EepAtomType::ManufCustomData => match atom.atype {
                 EepAtomType::ManufCustomData => (),
                 _ => {
-                    return Err(EepError(format!(
-                        "Wrong atom order: Got `{}`, expected {}",
-                        atom.atype,
-                        EepAtomType::ManufCustomData,
-                    )));
+                    return Err(EepPushError::WrongAtomOrder {
+                        atype: atom.atype,
+                        prev: Some(last.atype),
+                        expected: vec![EepAtomType::ManufCustomData],
+                    });
                 }
             },
         }
