@@ -3,10 +3,11 @@
 
 use crate::ValidationError;
 use rpi_hat_eep::gpio_map;
+use rpi_hat_eep::gpio_map::{BANK0_GPIOS, BANK1_GPIOS};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
-const MAX_GPIOS: usize = 28;
+const MAX_GPIOS: usize = BANK0_GPIOS + BANK1_GPIOS;
 
 /// This defines possible values for the pin drive strength
 ///
@@ -257,7 +258,7 @@ pub struct GpioBank {
 }
 
 impl GpioBank {
-    pub fn validate(&self) -> Result<(), ValidationError> {
+    pub fn validate(&self, bank_no: gpio_map::GpioBank) -> Result<(), ValidationError> {
         let mut configured_gpios: Vec<bool> = vec![false; MAX_GPIOS];
         for gpio in &self.gpios {
             if gpio.gpio == 0 || gpio.gpio == 1 {
@@ -266,11 +267,25 @@ impl GpioBank {
                     gpio.gpio
                 )));
             }
-            if gpio.gpio as usize >= MAX_GPIOS {
-                return Err(ValidationError(format!(
-                    "gpio#: {} >= {}",
-                    gpio.gpio, MAX_GPIOS
-                )));
+            match bank_no {
+                gpio_map::GpioBank::Bank0 => {
+                    if gpio.gpio as usize >= BANK0_GPIOS {
+                        return Err(ValidationError(format!(
+                            "gpio# (bank0): {} (MIN: {}, MAX: {})",
+                            gpio.gpio, 2, BANK0_GPIOS - 1
+                        )));
+                    }
+                }
+                gpio_map::GpioBank::Bank1 => {
+                    if (gpio.gpio as usize) >= BANK0_GPIOS + BANK1_GPIOS
+                        || (gpio.gpio as usize) < BANK0_GPIOS
+                    {
+                        return Err(ValidationError(format!(
+                            "gpio# (bank1): {} (MIN: {}, MAX: {})",
+                            gpio.gpio, BANK0_GPIOS, MAX_GPIOS - 1
+                        )));
+                    }
+                }
             }
             if configured_gpios[gpio.gpio as usize] {
                 return Err(ValidationError(format!(
@@ -290,19 +305,20 @@ impl Display for GpioBank {
     }
 }
 
-impl TryFrom<GpioBank> for gpio_map::EepAtomGpioMapData {
-    type Error = Box<dyn std::error::Error>;
-
-    fn try_from(bank: GpioBank) -> Result<Self, Self::Error> {
+impl GpioBank {
+    pub fn into_gpio_map(
+        self,
+        bank: gpio_map::GpioBank,
+    ) -> Result<gpio_map::EepAtomGpioMapData, gpio_map::GpioError> {
         let mut gpio_map = gpio_map::EepAtomGpioMapData::new(
-            gpio_map::GpioBank::Bank0,
-            bank.drive.into(),
-            bank.slew.into(),
-            bank.hysteresis.into(),
+            bank,
+            self.drive.into(),
+            self.slew.into(),
+            self.hysteresis.into(),
             gpio_map::GpioBackPower::None,
         );
 
-        for gpio in bank.gpios {
+        for gpio in self.gpios {
             gpio_map.set(
                 gpio.gpio as usize,
                 gpio_map::GpioPin::new(gpio.fsel.into(), gpio.pull.into(), true),

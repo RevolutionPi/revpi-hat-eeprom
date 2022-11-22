@@ -97,9 +97,10 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
         config.pstr,
     )?;
 
-    let gpio_map: gpio_map::EepAtomGpioMapData = config.gpiobanks[0].clone().try_into()?;
-
-    let mut eep = Eep::new(vendor_data, gpio_map);
+    let gpio_bank0_map: gpio_map::EepAtomGpioMapData = config.gpiobanks[0]
+        .clone()
+        .into_gpio_map(gpio_map::GpioBank::Bank0)?;
+    let mut eep = Eep::new(vendor_data, gpio_bank0_map);
 
     let dtb = rpi_hat_eep::EepAtomLinuxDTBData::new(rpi_hat_eep::LinuxDTB::Name(config.dtstr));
     eep.push(EepAtom::new_linux_dtb(dtb))?;
@@ -125,6 +126,12 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
     );
     eep.push(EepAtom::new_custom(data))?;
 
+    if config.gpiobanks.len() > 1 {
+        let gpio_bank1_map: gpio_map::EepAtomGpioMapData = config.gpiobanks[1]
+            .clone()
+            .into_gpio_map(gpio_map::GpioBank::Bank1)?;
+        eep.push(EepAtom::new_gpio_bank1_map(gpio_bank1_map))?;
+    }
     Ok(eep)
 }
 

@@ -6,6 +6,7 @@ pub mod gpio;
 use self::gpio::GpioBank;
 use chrono::NaiveDate;
 use eui48::MacAddress;
+use rpi_hat_eep::gpio_map;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
@@ -54,7 +55,27 @@ impl std::fmt::Display for ValidationError {
 ///                 {
 ///                     "gpio": 4,
 ///                     "fsel": "alt1",
-///                     "pull": "up"
+///                     "pull": "up",
+///                     "comment": [
+///                         "This configures the I2C1 SCL",
+///                         "external pull-up missing"
+///                     ]
+///                 }
+///             ]
+///         },
+///         {
+///             "drive": "16mA",
+///             "slew": "default",
+///             "hysteresis": "default",
+///             "gpios": [
+///                 {
+///                     "gpio": 31,
+///                     "fsel": "input",
+///                     "pull": "none",
+///                     "comment": [
+///                         "LAN9514 nRESET (USB_CM.RUN)",
+///                         "external pull-up"
+///                     ]
 ///                 }
 ///             ]
 ///         }
@@ -126,8 +147,15 @@ fn validate(eep: &RevPiHatEeprom) -> Result<(), ValidationError> {
             u32::MAX
         )));
     }
-    for bank in &eep.gpiobanks {
-        bank.validate()?;
+    if eep.gpiobanks.is_empty() || eep.gpiobanks.len() > 2 {
+        return Err(ValidationError(format!(
+            "unsupported number of gpio banks: {} (min: 1; max: 2)",
+            eep.gpiobanks.len()
+        )));
+    }
+    eep.gpiobanks[0].validate(gpio_map::GpioBank::Bank0)?;
+    if eep.gpiobanks.len() > 1 {
+        eep.gpiobanks[1].validate(gpio_map::GpioBank::Bank1)?;
     }
     Ok(())
 }
