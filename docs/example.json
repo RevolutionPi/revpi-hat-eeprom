@@ -32,6 +32,22 @@
                     ]
                 }
             ]
+        },
+        {
+            "drive": "16mA",
+            "slew": "default",
+            "hysteresis": "default",
+            "gpios": [
+                {
+                    "gpio": 31,
+                    "fsel": "input",
+                    "pull": "none",
+                    "comment": [
+                        "LAN9514 nRESET (USB_CM.RUN)",
+                        "external pull-up"
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -64,7 +64,7 @@
         "gpiobanks": {
             "description": "GPIOBank configuration (only bank 0 is supported at the moment)",
             "type": "array",
-            "maxItems": 1,
+            "maxItems": 2,
             "items": {
                 "type": "object",
                 "required": [ "drive", "slew", "hysteresis", "gpios" ],
@@ -95,7 +95,7 @@
                                     "description": "GPIO or pin number",
                                     "type": "integer",
                                     "minimum": 2,
-                                    "maximum": 27
+                                    "maximum": 45
                                 },
                                 "fsel": {
                                     "description": "Alternate function setting for this gpio",
