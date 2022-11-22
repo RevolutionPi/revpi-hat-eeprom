@@ -26,8 +26,9 @@
     - [Atom Structure](#atom-structure)
     - [Atom Types](#atom-types)
       - [Vendor info atom data (type=0x0001):](#vendor-info-atom-data-type0x0001)
-      - [GPIO map atom data (type=0x0002):](#gpio-map-atom-data-type0x0002)
+      - [GPIO (bank 0) map atom data (type=0x0002):](#gpio-bank-0-map-atom-data-type0x0002)
       - [Device Tree atom data (type=0x0003):](#device-tree-atom-data-type0x0003)
+      - [GPIO (bank 1) map atom data (type=0x0005):](#gpio-bank-1-map-atom-data-type0x0005)
 
 ## Revisions of this Document
 
@@ -37,10 +38,11 @@
 | 1.1     | 2022-09-06 | On strings no `\0` termination is needed. Restructure the document. Move the _Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION_ to the Appendix. |
 | 1.2     | 2022-10-04 | Update the description of the product version |
 | 1.3     | 2022-11-22 | Add EEPROM Data Version field |
+| 1.4     | 2022-11-22 | Reference the updated _Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION_ with added gpio bank1 support |
 
 ## RevPi Hat EEPROM Format Specification (v1)
 
-The RevPi HAT EEPROM format is based on the [Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](https://github.com/raspberrypi/hats/blob/9616b5cd2bdf3e1d2d0330611387d639c1916100/eeprom-format.md) (RPi Hat Spec.). The data supplied this way is added to the device tree by the bootloader. A `hat` node is created below the root of the device tree. It can be accessed at runtime through the procfs: `/proc/device-tree/hat/`. The `hat` node can contain various attributes.
+The RevPi HAT EEPROM format is based on the [Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](https://github.com/raspberrypi/hats/blob/ae057ecca83e25e43531b6eed499b2b728c4ddf4/eeprom-format.md) (RPi Hat Spec.). The data supplied this way is added to the device tree by the bootloader. A `hat` node is created below the root of the device tree. It can be accessed at runtime through the procfs: `/proc/device-tree/hat/`. The `hat` node can contain various attributes.
 
 The mandatory atoms of the _Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION_ are also mandatory for this format. For details see [The Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](#the-raspberry-pi-hat-id-eeprom-format-specification).
 
@@ -184,13 +186,13 @@ ASCII string
 
 The GPIO map can be used to configure GPIOs before the kernel is booted.
 
-| :warning: Only the first 28 GPIOs (the first bank) can be configured this way. GPIOs 28 and above need to be configured in the devicetree/kernel. |
-|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| :information_source: The GPIOs are devided into banks the first bank (bank0) contains the GPIOs 0-27. The second bank (bank1) contains the GPIOs 28-45.|
+|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 
-| :warning: Some properties like the drive strength, slew rate and hysteresis will be applied for the whole bank (GPIOs 0-27). |
-|------------------------------------------------------------------------------------------------------------------------------|
+| :warning: Some properties like the drive strength, slew rate and hysteresis will be applied for the whole bank (GPIOs 0-27 or GPIOs 28-45). |
+|---------------------------------------------------------------------------------------------------------------------------------------------|
 
-See [GPIO map atom data (type=0x0002):](#gpio-map-atom-data-type0x0002) of the [The Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](#the-raspberry-pi-hat-id-eeprom-format-specification) for more details.
+See [GPIO (bank 0) map atom data (type=0x0002)](#gpio-bank-0-map-atom-data-type0x0002) and [GPIO (bank 1) map atom data (type=0x0005)](#gpio-bank-1-map-atom-data-type0x0005)of the [The Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](#the-raspberry-pi-hat-id-eeprom-format-specification) for more details.
 
 ### Linux Device Tree (Blob) Atom
 
@@ -337,10 +339,11 @@ https://github.com/raspberrypi/hats/blob/master/eeprom-format.md
 ```text
   HEADER  <- EEPROM header (Required)
   ATOM1   <- Vendor info atom (Required)
-  ATOM2   <- GPIO map atom (Required)
+  ATOM2   <- GPIO (bank 0) map atom (Required)
   ATOM3   <- DT blob atom (Required for compliance with the HAT specification)
   ...
-  ATOMn
+  ATOMn-1
+  ATOMn   <- GPIO (bank 1) map atom (Optional, only available on CM1, CM3, CM3+ and CM4S)
 ```
 
 #### EEPROM Header Structure
@@ -370,10 +373,11 @@ https://github.com/raspberrypi/hats/blob/master/eeprom-format.md
 ```text
   0x0000 = invalid
   0x0001 = vendor info
-  0x0002 = GPIO map
+  0x0002 = GPIO (bank 0) map
   0x0003 = Linux device tree blob
   0x0004 = manufacturer custom data
-  0x0005-0xfffe = reserved for future use
+  0x0005 = GPIO (bank 1) map
+  0x0006-0xfffe = reserved for future use
   0xffff = invalid
 ```
 
@@ -396,7 +400,7 @@ manufacturers as a per-board 'serial number'.
   Y       pstr        ASCII product string e.g. "Special Sensor Board"
 ```
 
-##### GPIO map atom data (type=0x0002):
+##### GPIO (bank 0) map atom data (type=0x0002):
 
   GPIO map for bank 0 GPIO on 40W B+ header.
 
@@ -429,3 +433,24 @@ manufacturers as a per-board 'serial number'.
 Binary data (the name or contents of a `.dtbo` overlay, for board hardware).
 
 For more information on the Device Tree atom contents, see the [Device Tree Guide](devicetree-guide.md).
+
+##### GPIO (bank 1) map atom data (type=0x0005):
+
+  GPIO map for bank 1 GPIOs (28-45) only available on CM1, CM3, CM3+ and CM4S. This must be the last atom.
+
+```text
+  Bytes   Field
+  1       bank_drive  bank drive strength/slew/hysteresis, BCM2835 can only set per bank, not per IO
+            Bits in byte:
+            [3:0] drive       0=leave at default, 1-8=drive*2mA, 9-15=reserved
+            [5:4] slew        0=leave at default, 1=slew rate limiting, 2=no slew limiting, 3=reserved
+            [7:6] hysteresis  0=leave at default, 1=hysteresis disabled, 2=hysteresis enabled, 3=reserved
+  1       reserved
+            [7:0] reserved    set to 0
+  18      1 byte per IO pin
+            Bits in each byte:
+            [2:0] func_sel    GPIO function as per FSEL GPIO register field in BCM2835 datasheet
+            [4:3] reserved    set to 0
+            [6:5] pulltype    0=leave at default setting,  1=pullup, 2=pulldown, 3=no pull
+            [  7] is_used     1=board uses this pin, 0=not connected and therefore not used
+```
