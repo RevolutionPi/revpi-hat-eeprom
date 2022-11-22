@@ -18,6 +18,7 @@
     - [(3) Endtest Date](#3-endtest-date)
     - [(4) LOT/Batch Number](#4-lotbatch-number)
     - [(5) MAC Address](#5-mac-address)
+    - [(6) EEPROM Data Version](#6-eeprom-data-version)
 - [Appendix](#appendix)
   - [The Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION](#the-raspberry-pi-hat-id-eeprom-format-specification)
     - [EEPROM Structure](#eeprom-structure)
@@ -35,6 +36,7 @@
 | 1.0     | 2022-06-10 | Initial release |
 | 1.1     | 2022-09-06 | On strings no `\0` termination is needed. Restructure the document. Move the _Raspberry Pi HAT ID EEPROM FORMAT SPECIFICATION_ to the Appendix. |
 | 1.2     | 2022-10-04 | Update the description of the product version |
+| 1.3     | 2022-11-22 | Add EEPROM Data Version field |
 
 ## RevPi Hat EEPROM Format Specification (v1)
 
@@ -62,6 +64,7 @@ The RevPi Hat EEPROM Format uses the custom atoms of the RPi Hat Spec. As the cu
 | 3     | Endtest Date        | u32          | ASCII String   | `20220419`          |
 | 4     | LOT/Batch Number    | TBD          | TBD            | TBD                 |
 | 5     | (first) MAC Address | ASCII String | ASCII String   | `C8:3E:A7:01:32:5E` |
+| 6     | EEPROM Data Version | u16          | ASCII String   | `3`                 |
 
 The _Data Type_ is a hint. A valid value of the attribute will never exceed the size of the data type. _Attribute Type_ is the actual type used to represent the value in the attribute.
 
@@ -304,6 +307,24 @@ This file represents the (first) MAC address for this device. If the device has 
 
 ##### Example(s) <!-- omit in toc -->
 `C8:3E:A7:01:32:5E`
+
+#### (6) EEPROM Data Version
+
+This attribute represents the version of the content of the EEPROM. The version must be incremented every time a new version of the revpi-hat-data for the product is released. So the EEPROM Data Version is independent for each product.
+A version below 1 is invalid and must be treated as development version.
+The version must be incremented for every released change to the content of the EEPROM (with exception to Endtest Date and MAC Address).
+
+##### Data Type <!-- omit in toc -->
+16-bit unsigned integer
+
+##### Attribute Path <!-- omit in toc -->
+`/proc/device-tree/hat/custom_6`
+
+##### Attribute Representation <!-- omit in toc -->
+Base 10 representation as ASCII string
+
+##### Example(s) <!-- omit in toc -->
+`3`
 
 ## Appendix
 
