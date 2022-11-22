@@ -15,6 +15,7 @@ _gpiobanks_ describes settings for a gpio bank of the SoC. At the moment only ba
 ```json
 {
     "version": 1,
+    "eeprom_data_version": 42,
     "vstr": "Kunbus GmbH",
     "pstr": "RevPi MiniXL",
     "pid": 642,
@@ -55,6 +56,7 @@ All fields are mandatory.
 | Field     | JSON Datatype             | Range       | Description | Example  |
 |:----------|:--------------------------|:------------|:------------|:---------|
 | version   | number                    | u16         | Version of the EEPROM format | 1 |
+| eeprom_data_version | number  | u16  | Version of the EEPROM data | 42 |
 | vstr      | string                    | 255&#160;chars | Vendor of the device | KUNBUS&#160;GmbH  |
 | pstr      | string                    | 255&#160;chars | Product name         | RevPi&#160;MiniXL |
 | pid       | number                    | u16         | Product identification number | 42 |
