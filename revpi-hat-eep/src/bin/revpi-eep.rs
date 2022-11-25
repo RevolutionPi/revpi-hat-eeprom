@@ -105,28 +105,35 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
     let dtb = rpi_hat_eep::EepAtomLinuxDTBData::new(rpi_hat_eep::LinuxDTB::Name(config.dtstr));
     eep.push(EepAtom::new_linux_dtb(dtb))?;
 
+    // custom_0
     let data = EepAtomCustomData::new(config.version.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
-    let data = EepAtomCustomData::new(config.eeprom_data_version.to_string().into_bytes());
-    eep.push(EepAtom::new_custom(data))?;
-
+    // custom_1
     let data = EepAtomCustomData::new(serial.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
+    // custom_2
     let data = EepAtomCustomData::new(config.prev.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
+    // custom_3
     let data = EepAtomCustomData::new(edate.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
+    // custom_4
     let data = EepAtomCustomData::new("0".as_bytes().to_vec());
     eep.push(EepAtom::new_custom(data))?;
 
+    // custom_5
     let data = EepAtomCustomData::new(
         mac.to_string(eui48::MacAddressFormat::HexString)
             .into_bytes(),
     );
+    eep.push(EepAtom::new_custom(data))?;
+
+    // custom_6
+    let data = EepAtomCustomData::new(config.eeprom_data_version.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
     if config.gpiobanks.len() > 1 {
