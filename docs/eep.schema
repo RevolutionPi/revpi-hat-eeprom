@@ -68,8 +68,9 @@
             "pattern": "^([A-F0-9]{2}[-:]){5}[A-F0-9]{2}$"
         },
         "gpiobanks": {
-            "description": "GPIOBank configuration (only bank 0 is supported at the moment)",
+            "description": "GPIOBank configuration, supports bank0 (mandatory) and bank1",
             "type": "array",
+            "minItems": 1,
             "maxItems": 2,
             "items": {
                 "type": "object",
