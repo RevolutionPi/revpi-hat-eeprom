@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
+// SPDX-FileCopyrightText: Copyright 2022-2023 KUNBUS GmbH
 
 use chrono::NaiveDate;
 use clap::Parser;
-use eui48::MacAddress;
+use macaddr::MacAddr6;
 use revpi_hat_eep::RevPiHatEeprom;
 use rpi_hat_eep::{gpio_map, Eep, EepAtom, EepAtomCustomData, ToBytes};
 use std::fs::OpenOptions;
@@ -126,10 +126,7 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
     eep.push(EepAtom::new_custom(data))?;
 
     // custom_5
-    let data = EepAtomCustomData::new(
-        mac.to_string(eui48::MacAddressFormat::HexString)
-            .into_bytes(),
-    );
+    let data = EepAtomCustomData::new(mac.to_string().into_bytes());
     eep.push(EepAtom::new_custom(data))?;
 
     // custom_6
@@ -159,7 +156,7 @@ pub struct Cli {
     /// The (first) mac address of the device. It is mandatory if the mac is not included in the
     /// config file. This option will override the mac from the config file.
     #[clap(long)]
-    pub mac: Option<MacAddress>,
+    pub mac: Option<MacAddr6>,
     /// Full json configuration export file name. The full json configuration includes also the
     /// serial, edate and mac.
     #[clap(long, value_parser, value_name = "EXPORT_CONFIG")]
@@ -258,13 +255,13 @@ fn main() {
         chrono::Local::now().date_naive()
     };
 
-    let mac = if let Some(mac_cli) =  cli.mac {
+    let mac = if let Some(mac_cli) = cli.mac {
         if let Some(mac_config) = config.mac {
             eprintln!(
                 "WARNING: Overriding mac from the config file (`{}`) \
                 with the mac from the program arguments (`{}`).",
-                mac_config.to_hex_string(),
-                mac_cli.to_hex_string()
+                mac_config,
+                mac_cli
             );
         }
         mac_cli

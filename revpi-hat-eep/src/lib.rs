@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
+// SPDX-FileCopyrightText: Copyright 2022-2023 KUNBUS GmbH
 
 pub mod gpio;
 
 use self::gpio::GpioBank;
 use chrono::NaiveDate;
-use eui48::MacAddress;
+use macaddr::MacAddr6;
 use rpi_hat_eep::gpio_map;
 use serde::{Deserialize, Serialize};
 
@@ -108,7 +108,7 @@ pub struct RevPiHatEeprom {
     /// The end test date represents the current date as of when the end of line test is/was done, see [Endtest Date](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#3-endtest-date)
     pub edate: Option<NaiveDate>,
     /// The first mac address of the device, see [MAC Address](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#5-mac-address)
-    pub mac: Option<MacAddress>,
+    pub mac: Option<MacAddr6>,
     /// The configuration of the first gpiobank, see [GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
     pub gpiobanks: Vec<GpioBank>,
 }
