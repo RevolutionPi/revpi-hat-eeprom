@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-# SPDX-FileCopyrightText: Copyright KUNBUS GmbH
+# SPDX-FileCopyrightText: Copyright 2022-2023 KUNBUS GmbH
 
 [workspace]
 members = ["revpi-hat-eep", "rpi-hat-eep"]
+
+[profile.release]
+strip = true
