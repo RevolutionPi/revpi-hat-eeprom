@@ -1,5 +1,6 @@
+// SPDX-FileCopyrightText: 2022-2023 KUNBUS GmbH <support@kunbus.com>
+//
 // SPDX-License-Identifier: GPL-2.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2023 KUNBUS GmbH
 
 use chrono::NaiveDate;
 use clap::Parser;

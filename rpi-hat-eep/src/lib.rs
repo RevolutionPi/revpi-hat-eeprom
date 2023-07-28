@@ -1,5 +1,6 @@
+// SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+//
 // SPDX-License-Identifier: GPL-2.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
 use crc::{Crc, CRC_16_ARC};
 

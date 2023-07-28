@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+
+SPDX-License-Identifier: GPL-2.0-or-later
+-->
+
 # RevPi HAT EEPROM JSON format
 
 The RevPi HAT EEPROM format is an extension to the RPi HAT EEPROM format¹ and describes additional data fields that are used by a RevPi.

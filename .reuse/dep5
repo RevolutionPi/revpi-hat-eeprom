@@ -1,0 +1,6 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://github.com/RevolutionPi/revpi-hat-eeprom
+
+Files: Cargo.lock
+Copyright: KUNBUS GmbH
+License: GPL-2.0-or-later

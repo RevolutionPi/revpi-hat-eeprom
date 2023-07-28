@@ -1,5 +1,6 @@
+// SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+//
 // SPDX-License-Identifier: GPL-2.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022 KUNBUS GmbH
 
 pub const BANK0_GPIOS: usize = 28;
 pub const BANK1_GPIOS: usize = 18;

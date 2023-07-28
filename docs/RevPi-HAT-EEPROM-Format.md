@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+
+SPDX-License-Identifier: GPL-2.0-or-later
+-->
+
 # RevPi HAT EEPROM Format (v1)  <!-- omit in toc -->
 
 - [Revisions of this Document](#revisions-of-this-document)
