@@ -7,3 +7,13 @@ include:
     file: "base.yml"
   - project: "revolutionpi/infrastructure/ci-templates"
     file: "/reuse-lint.yml"
+
+lint-clippy:
+  image: rust:latest
+  stage: lint
+  tags:
+    - self-hosted
+    - host-arm64
+  script:
+    - rustup component add clippy
+    - cargo clippy --all-features
