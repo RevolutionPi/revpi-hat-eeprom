@@ -287,7 +287,7 @@ impl RevPiHatEeprom {
         }
         if self.pstr.len() >= 256 {
             return Err(ValidationError(format!(
-                "invalid value: `{}`: Product string to long {} (max: {}) bytes",
+                "invalid value: `{}`: Product string too long {} (max: {}) bytes",
                 self.pstr,
                 self.pstr.len(),
                 u8::MAX
@@ -295,7 +295,7 @@ impl RevPiHatEeprom {
         }
         if self.vstr.len() >= 256 {
             return Err(ValidationError(format!(
-                "invalid value: `{}`: Vendor string to long: {} (max: {}) bytes",
+                "invalid value: `{}`: Vendor string too long: {} (max: {}) bytes",
                 self.vstr,
                 self.vstr.len(),
                 u8::MAX
@@ -303,7 +303,7 @@ impl RevPiHatEeprom {
         }
         if self.dtstr.len() >= u32::MAX as usize {
             return Err(ValidationError(format!(
-                "invalid value: `{}`: Device tree string to long: {} (max: {}) bytes",
+                "invalid value: `{}`: Device tree string too long: {} (max: {}) bytes",
                 self.dtstr,
                 self.dtstr.len(),
                 u32::MAX

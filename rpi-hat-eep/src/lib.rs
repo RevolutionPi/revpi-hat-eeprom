@@ -437,14 +437,14 @@ impl EepAtomVendorData {
     ) -> Result<EepAtomVendorData, EepError> {
         if vstr.len() > u8::MAX as usize {
             return Err(EepError(format!(
-                "Vendor string to long: {} (max: {} bytes)",
+                "Vendor string too long: {} (max: {} bytes)",
                 vstr.len(),
                 u8::MAX
             )));
         }
         if pstr.len() > u8::MAX as usize {
             return Err(EepError(format!(
-                "Product string to long: {} (max: {} bytes)",
+                "Product string too long: {} (max: {} bytes)",
                 pstr.len(),
                 u8::MAX
             )));
