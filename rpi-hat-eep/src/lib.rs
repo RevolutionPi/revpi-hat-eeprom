@@ -12,16 +12,16 @@ pub mod gpio_map;
 
 /// This trait is used to write the object into a byte vector
 ///
-/// All objects which implement this trait can be written to a Vec<u8>. How the object is written to
-/// the Vec<u8> is decided by the object itself. This trait is defined by the following two methods
-/// [len](ToBytes::len()) and [to_bytes](ToBytes::to_bytes()):
+/// All objects which implement this trait can be written to a `Vec<u8>`. How the object is written
+/// to the `Vec<u8>` is decided by the object itself. This trait is defined by the following two
+/// methods [len](ToBytes::len()) and [to_bytes](ToBytes::to_bytes()):
 /// * The [len](ToBytes::len()) method returns the size the object will use when it is written into
 ///   the vector.
-/// * The [to_bytes](ToBytes::to_bytes()) appends the object to a [Vec<u8>].
+/// * The [to_bytes](ToBytes::to_bytes()) appends the object to a [`Vec<u8>`].
 pub trait ToBytes {
     /// Return the size the object will use when it is written into the vector.
     ///
-    /// This method will calculate the size of the object when it is converted into a [Vec<u8>].
+    /// This method will calculate the size of the object when it is converted into a [`Vec<u8>`].
     fn len(&self) -> usize;
     /// This method writes the object to a given vector.
     ///
