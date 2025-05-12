@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+// SPDX-FileCopyrightText: 2022-2025 KUNBUS GmbH <support@kunbus.com>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -259,6 +259,21 @@ pub struct GpioBank {
 }
 
 impl GpioBank {
+    #[must_use]
+    pub const fn new(
+        drive: GpioBankDrive,
+        slew: GpioBankSlew,
+        hysteresis: GpioBankHysteresis,
+        gpios: Vec<GpioPin>,
+    ) -> Self {
+        Self {
+            drive,
+            slew,
+            hysteresis,
+            gpios,
+        }
+    }
+
     pub fn validate(&self, bank_no: gpio_map::GpioBank) -> Result<(), ValidationError> {
         let mut configured_gpios: Vec<bool> = vec![false; MAX_GPIOS];
         for gpio in &self.gpios {
@@ -273,7 +288,9 @@ impl GpioBank {
                     if gpio.gpio as usize >= BANK0_GPIOS {
                         return Err(ValidationError(format!(
                             "gpio# (bank0): {} (MIN: {}, MAX: {})",
-                            gpio.gpio, 2, BANK0_GPIOS - 1
+                            gpio.gpio,
+                            2,
+                            BANK0_GPIOS - 1
                         )));
                     }
                 }
@@ -283,7 +300,9 @@ impl GpioBank {
                     {
                         return Err(ValidationError(format!(
                             "gpio# (bank1): {} (MIN: {}, MAX: {})",
-                            gpio.gpio, BANK0_GPIOS, MAX_GPIOS - 1
+                            gpio.gpio,
+                            BANK0_GPIOS,
+                            MAX_GPIOS - 1
                         )));
                     }
                 }
