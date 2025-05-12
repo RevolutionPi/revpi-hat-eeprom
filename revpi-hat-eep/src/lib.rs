@@ -1,8 +1,10 @@
-// SPDX-FileCopyrightText: 2022-2023 KUNBUS GmbH <support@kunbus.com>
+// SPDX-FileCopyrightText: 2022-2025 KUNBUS GmbH <support@kunbus.com>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 pub mod gpio;
+
+use std::path::{Path, PathBuf};
 
 use self::gpio::GpioBank;
 use chrono::NaiveDate;
@@ -18,6 +20,81 @@ impl std::error::Error for ValidationError {}
 impl std::fmt::Display for ValidationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+#[non_exhaustive]
+/// The definition of a template used to compute a [`RevPiHatEeprom`] from a [`RawRevPiHatEeprom`]
+/// if the field [`RawRevPiHatEeprom::include`] is given.
+///
+/// The template defines only fields that may be overridden. Additionally, to be a valid template
+/// and be allowed to be included in a [`RawRevPiHatEeprom`] in the first place, the fields
+/// [`TemplateDefinition::version`] and [`TemplateDefinition::eeprom_data_version`] must match the
+/// fields [`RawRevPiHatEeprom::version`] and [`RawRevPiHatEeprom::eeprom_data_version`]
+/// respectively, otherwise it's an invalid template inclusion and should produce an error.
+pub struct TemplateDefinition {
+    pub version: u16,
+    pub eeprom_data_version: u16,
+    pub gpiobanks: Vec<GpioBank>,
+}
+
+impl TemplateDefinition {
+    pub fn from_file(template_dir: &Path, name: &Path) -> Result<Self, Box<dyn std::error::Error>> {
+        let s = std::fs::read_to_string(template_dir.join(name))?;
+        let template: Self = serde_json::from_str(&s)?;
+        Ok(template)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[non_exhaustive]
+/// Definition of how to include a [`TemplateDefinition`].
+///
+/// The template may be included either as a [`TemplateInclude::Filename`] or as a
+/// [`TemplateInclude::Object`]. The former is the name of a file in the template dir that is
+/// specified elsewhere, the latter is an inline [`TemplateDefinition`] which should only be used
+/// for testing.
+pub enum TemplateInclude {
+    Filename(PathBuf),
+    Object(TemplateDefinition),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+#[non_exhaustive]
+/// The raw form of a [`RevPiHatEeprom`] which allows inclusion of a [`TemplateDefinition`].
+///
+/// The [`RawRevPiHatEeprom`] may define a [`TemplateDefinition`] to include. The
+/// [`TemplateDefinition`] acts as the base of the definition. If any fields are given in both
+/// the [`RawRevPiHatEeprom`] and the [`TemplateDefinition`], the [`RawRevPiHatEeprom`] definition
+/// will be used.
+///
+/// An error occurs if the [`RawRevPiHatEeprom`] overrides all the fields in the included
+/// [`TemplateDefinition`] as the [`TemplateDefinition`] is unnecessary in this case.
+pub struct RawRevPiHatEeprom {
+    pub version: u16,
+    pub eeprom_data_version: u16,
+    pub vstr: String,
+    pub pstr: String,
+    pub pid: u16,
+    pub prev: u16,
+    pub pver: u16,
+    pub dtstr: String,
+    pub serial: Option<u32>,
+    pub edate: Option<NaiveDate>,
+    pub mac: Option<MacAddr6>,
+    pub gpiobanks: Option<Vec<GpioBank>>,
+    pub include: Option<TemplateInclude>,
+}
+
+impl TryFrom<&str> for RawRevPiHatEeprom {
+    type Error = Box<dyn std::error::Error>;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let raw_eep: Self = serde_json::from_str(value)?;
+        Ok(raw_eep)
     }
 }
 
@@ -85,7 +162,7 @@ impl std::fmt::Display for ValidationError {
 /// }
 /// ```
 ///
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RevPiHatEeprom {
     /// The version of the used [RevPi HAT EEPROM Format](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#0-format-version)
@@ -114,52 +191,134 @@ pub struct RevPiHatEeprom {
     pub gpiobanks: Vec<GpioBank>,
 }
 
-pub fn parse_config(s: &str) -> Result<RevPiHatEeprom, Box<dyn std::error::Error>> {
-    let eep: RevPiHatEeprom = serde_json::from_str(s)?;
-    validate(&eep)?;
-    Ok(eep)
-}
+impl RevPiHatEeprom {
+    /// Create a [`RevPiHatEeprom`] from a configuration string.
+    ///
+    /// The configuration may be a [`RawRevPiHatEeprom`] which might include a template. If this is
+    /// the case, the `template_dir` needs to be known, which is the second parameter of this
+    /// function.
+    ///
+    /// The argument `template_dir` is lazily evaluated. This means that checking if the directory
+    /// exists is only done if the `include` keyword is used in the [`RawRevPiHatEeprom`].
+    pub fn from_config_str(
+        template_dir: &Path,
+        config: &str,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let raw_eep: RawRevPiHatEeprom = serde_json::from_str(config)?;
+        Self::from_raw_definition(template_dir, raw_eep)
+    }
 
-fn validate(eep: &RevPiHatEeprom) -> Result<(), ValidationError> {
-    if eep.version != 1 {
-        return Err(ValidationError(format!(
-            "invalid value: `{}`: Unsupported format version",
-            eep.version
-        )));
+    /// Create a [`RevPiHatEeprom`] from a [`RawRevPiHatEeprom`].
+    ///
+    /// The argument `template_dir` is lazily evaluated. This means that checking if the directory
+    /// exists is only done if the `include` keyword is used in the [`RawRevPiHatEeprom`].
+    pub fn from_raw_definition(
+        template_dir: &Path,
+        raw_definition: RawRevPiHatEeprom,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let Some(include) = raw_definition.include else {
+            if let Some(gpiobanks) = raw_definition.gpiobanks {
+                return Ok(Self {
+                    version: raw_definition.version,
+                    eeprom_data_version: raw_definition.eeprom_data_version,
+                    vstr: raw_definition.vstr,
+                    pstr: raw_definition.pstr,
+                    pid: raw_definition.pid,
+                    prev: raw_definition.prev,
+                    pver: raw_definition.pver,
+                    dtstr: raw_definition.dtstr,
+                    serial: raw_definition.serial,
+                    edate: raw_definition.edate,
+                    mac: raw_definition.mac,
+                    gpiobanks,
+                });
+            }
+
+            return Err(Box::new(ValidationError(
+                "Definition requires \"gpiobanks\" attribute".to_string(),
+            )));
+        };
+
+        // check if all fields in the template are overridden
+        if raw_definition.gpiobanks.is_some() {
+            return Err(Box::new(ValidationError(
+                "All fields of the template are overridden, template is useless".to_string(),
+            )));
+        }
+
+        let def = match include {
+            TemplateInclude::Filename(name) => TemplateDefinition::from_file(template_dir, &name)?,
+            TemplateInclude::Object(def) => def,
+        };
+
+        if raw_definition.version != def.version
+            || raw_definition.eeprom_data_version != def.eeprom_data_version
+        {
+            return Err(Box::new(ValidationError(
+                "Version fields of definition and template have to match".to_string(),
+            )));
+        }
+
+        let definition = Self {
+            version: raw_definition.version,
+            eeprom_data_version: raw_definition.eeprom_data_version,
+            vstr: raw_definition.vstr,
+            pstr: raw_definition.pstr,
+            pid: raw_definition.pid,
+            prev: raw_definition.prev,
+            pver: raw_definition.pver,
+            dtstr: raw_definition.dtstr,
+            serial: raw_definition.serial,
+            edate: raw_definition.edate,
+            mac: raw_definition.mac,
+            gpiobanks: def.gpiobanks,
+        };
+        definition.validate()?;
+
+        Ok(definition)
     }
-    if eep.pstr.len() >= 256 {
-        return Err(ValidationError(format!(
-            "invalid value: `{}`: Product string to long {} (max: {}) bytes",
-            eep.pstr,
-            eep.pstr.len(),
-            u8::MAX
-        )));
+
+    fn validate(&self) -> Result<(), ValidationError> {
+        if self.version != 1 {
+            return Err(ValidationError(format!(
+                "invalid value: `{}`: Unsupported format version",
+                self.version
+            )));
+        }
+        if self.pstr.len() >= 256 {
+            return Err(ValidationError(format!(
+                "invalid value: `{}`: Product string to long {} (max: {}) bytes",
+                self.pstr,
+                self.pstr.len(),
+                u8::MAX
+            )));
+        }
+        if self.vstr.len() >= 256 {
+            return Err(ValidationError(format!(
+                "invalid value: `{}`: Vendor string to long: {} (max: {}) bytes",
+                self.vstr,
+                self.vstr.len(),
+                u8::MAX
+            )));
+        }
+        if self.dtstr.len() >= u32::MAX as usize {
+            return Err(ValidationError(format!(
+                "invalid value: `{}`: Device tree string to long: {} (max: {}) bytes",
+                self.dtstr,
+                self.dtstr.len(),
+                u32::MAX
+            )));
+        }
+        if self.gpiobanks.is_empty() || self.gpiobanks.len() > 2 {
+            return Err(ValidationError(format!(
+                "unsupported number of gpio banks: {} (min: 1; max: 2)",
+                self.gpiobanks.len()
+            )));
+        }
+        self.gpiobanks[0].validate(gpio_map::GpioBank::Bank0)?;
+        if self.gpiobanks.len() > 1 {
+            self.gpiobanks[1].validate(gpio_map::GpioBank::Bank1)?;
+        }
+        Ok(())
     }
-    if eep.vstr.len() >= 256 {
-        return Err(ValidationError(format!(
-            "invalid value: `{}`: Vendor string to long: {} (max: {}) bytes",
-            eep.vstr,
-            eep.vstr.len(),
-            u8::MAX
-        )));
-    }
-    if eep.dtstr.len() >= u32::MAX as usize {
-        return Err(ValidationError(format!(
-            "invalid value: `{}`: Device tree string to long: {} (max: {}) bytes",
-            eep.dtstr,
-            eep.dtstr.len(),
-            u32::MAX
-        )));
-    }
-    if eep.gpiobanks.is_empty() || eep.gpiobanks.len() > 2 {
-        return Err(ValidationError(format!(
-            "unsupported number of gpio banks: {} (min: 1; max: 2)",
-            eep.gpiobanks.len()
-        )));
-    }
-    eep.gpiobanks[0].validate(gpio_map::GpioBank::Bank0)?;
-    if eep.gpiobanks.len() > 1 {
-        eep.gpiobanks[1].validate(gpio_map::GpioBank::Bank1)?;
-    }
-    Ok(())
 }

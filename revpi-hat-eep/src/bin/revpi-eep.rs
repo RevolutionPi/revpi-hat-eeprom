@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022-2023 KUNBUS GmbH <support@kunbus.com>
+// SPDX-FileCopyrightText: 2022-2025 KUNBUS GmbH <support@kunbus.com>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -168,6 +168,10 @@ pub struct Cli {
     /// Output file name
     #[clap(value_parser, value_name = "OUTPUT", default_value = "out.eep")]
     pub outfile_name: PathBuf,
+    /// Directory with templates. If no template directory is given the "template" directory in the
+    /// current working directory is used
+    #[clap(long)]
+    pub template_dir: Option<PathBuf>,
 }
 
 fn export_config(config: &RevPiHatEeprom, export_path: PathBuf) {
@@ -212,7 +216,11 @@ fn main() {
         }
     };
 
-    let mut config = match revpi_hat_eep::parse_config(&config) {
+    let mut config = match revpi_hat_eep::RevPiHatEeprom::from_config_str(
+        &cli.template_dir
+            .unwrap_or_else(|| std::env::current_dir().expect("Unable to get current directory")),
+        &config,
+    ) {
         Ok(config) => config,
         Err(e) => {
             eprintln!(
@@ -228,8 +236,7 @@ fn main() {
             eprintln!(
                 "WARNING: Overriding serial from the config file (`{}`) \
                 with the serial from the program arguments (`{}`).",
-                serial_config,
-                serial_cli
+                serial_config, serial_cli
             );
         }
         serial_cli
@@ -245,8 +252,7 @@ fn main() {
             eprintln!(
                 "WARNING: Overriding edate from the config file (`{}`) \
                 with the edate from the program arguments (`{}`).",
-                edate_config,
-                edate_cli
+                edate_config, edate_cli
             )
         }
         edate_cli
@@ -261,8 +267,7 @@ fn main() {
             eprintln!(
                 "WARNING: Overriding mac from the config file (`{}`) \
                 with the mac from the program arguments (`{}`).",
-                mac_config,
-                mac_cli
+                mac_config, mac_cli
             );
         }
         mac_cli
