@@ -1,12 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://revpi.kunbus.com/revpi.schema.json",
-    "title": "RevPi HAT EEPROM JSON",
-    "description": "The JSON format used in the revpi hat eeprom tool for additional configuration",
-    "type": "object",
-    "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "gpiobanks" ],
-    "additionalProperties": false,
-    "properties": {
+    "$defs": {
         "version": {
             "description": "RevPi HAT EEPROM format version",
             "type": "integer",
@@ -18,54 +13,6 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 65535
-        },
-        "vstr": {
-            "description": "Vendor string",
-            "type": "string",
-            "maxLength": 255
-        },
-        "pstr": {
-            "description": "Product name",
-            "type": "string",
-            "maxLength": 255
-        },
-        "pid": {
-            "description": "Product identifier",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 65535
-        },
-        "prev": {
-            "description": "Product revision",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 65535
-        },
-        "pver": {
-            "description": "Customer visible product version",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 65535
-        },
-        "dtstr": {
-            "description": "DeviceTree overlay name for this device",
-            "type": "string"
-        },
-        "serial": {
-            "description": "Serial number",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 4294967295
-        },
-        "edate": {
-            "description": "End of line test date",
-            "type": "string",
-            "pattern": "^([0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|[1-2][0-9]|0[1-9])$"
-        },
-        "mac": {
-            "description": "First mac address of the device",
-            "type": "string",
-            "pattern": "^([A-F0-9]{2}[-:]){5}[A-F0-9]{2}$"
         },
         "gpiobanks": {
             "description": "GPIOBank configuration, supports bank0 (mandatory) and bank1",
@@ -124,6 +71,95 @@
                     }
                 }
             }
+        }
+    },
+    "title": "RevPi HAT EEPROM JSON",
+    "description": "The JSON format used in the revpi hat eeprom tool for additional configuration",
+    "type": "object",
+    "oneOf": [
+        {
+            "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "gpiobanks" ]
+        },
+        {
+            "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "include" ]
+        }
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "version": {
+            "$ref": "#/$defs/version"
+        },
+        "eeprom_data_version": {
+            "$ref": "#/$defs/eeprom_data_version"
+        },
+        "vstr": {
+            "description": "Vendor string",
+            "type": "string",
+            "maxLength": 255
+        },
+        "pstr": {
+            "description": "Product name",
+            "type": "string",
+            "maxLength": 255
+        },
+        "pid": {
+            "description": "Product identifier",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "prev": {
+            "description": "Product revision",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "pver": {
+            "description": "Customer visible product version",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "dtstr": {
+            "description": "DeviceTree overlay name for this device",
+            "type": "string"
+        },
+        "serial": {
+            "description": "Serial number",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+        },
+        "edate": {
+            "description": "End of line test date",
+            "type": "string",
+            "pattern": "^([0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|[1-2][0-9]|0[1-9])$"
+        },
+        "mac": {
+            "description": "First mac address of the device",
+            "type": "string",
+            "pattern": "^([A-F0-9]{2}[-:]){5}[A-F0-9]{2}$"
+        },
+        "gpiobanks": {
+            "$ref": "#/$defs/gpiobanks"
+        },
+        "include": {
+            "description": "Include a template either by file name or by giving the definition inline",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "version": { "$ref": "#/$defs/version" },
+                        "eeprom_data_version": { "$ref": "#/$defs/eeprom_data_version" },
+                        "gpiobanks": { "$ref": "#/$defs/gpiobanks" }
+                    },
+                    "required": [ "version", "eeprom_data_version", "gpiobanks" ]
+                }
+            ]
         }
     }
 }

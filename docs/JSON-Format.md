@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+SPDX-FileCopyrightText: 2022-2025 KUNBUS GmbH <support@kunbus.com>
 
 SPDX-License-Identifier: GPL-2.0-or-later
 -->
@@ -57,22 +57,23 @@ _gpiobanks_ describes settings for a gpio bank of the SoC. At the moment only ba
 
 ### Main properties
 
-All fields are mandatory.
+All fields except `include` are mandatory.
 
-| Field     | JSON Datatype             | Range       | Description | Example  |
-|:----------|:--------------------------|:------------|:------------|:---------|
-| version   | number                    | u16         | Version of the EEPROM format | 1 |
-| eeprom_data_version | number           | u16         | Version of the EEPROM content | 3 |
-| vstr      | string                    | 255&#160;chars | Vendor of the device | KUNBUS&#160;GmbH  |
-| pstr      | string                    | 255&#160;chars | Product name         | RevPi&#160;MiniXL |
-| pid       | number                    | u16         | Product identification number | 42 |
-| prev      | number                    | u16         | Product revision     | 3 |
-| pver      | number                    | u16         | Product version      | 21 |
-| dtstr     | string                    | 255&#160;chars | Name of devicetree blob for this device | revpi-example-2022 |
-| serial    | number                    | u32         | Serial number of the device | 39485 |
-| edate     | string                    | YYYY-MM-DD  | The date of the end of line test | 2022-09-27 |
-| mac       | string                    | XX-XX-XX-XX-XX-XX | The first mac address of the device (`:` can be used instead of `-`) | C8-3E-A7-DE-AD-BE |
-| gpiobanks | array of gpiobank objects |             | List of gpiobanks to configure (only bank0 supported at the moment) | |
+| Field               | JSON Datatype             | Range             | Description                                                          | Example            |
+|---------------------|---------------------------|-------------------|----------------------------------------------------------------------|--------------------|
+| version             | number                    | u16               | Version of the EEPROM format                                         | 1                  |
+| eeprom_data_version | number                    | u16               | Version of the EEPROM content                                        | 3                  |
+| vstr                | string                    | 255&#160;chars    | Vendor of the device                                                 | KUNBUS&#160;GmbH   |
+| pstr                | string                    | 255&#160;chars    | Product name                                                         | RevPi&#160;MiniXL  |
+| pid                 | number                    | u16               | Product identification number                                        | 42                 |
+| prev                | number                    | u16               | Product revision                                                     | 3                  |
+| pver                | number                    | u16               | Product version                                                      | 21                 |
+| dtstr               | string                    | 255&#160;chars    | Name of devicetree blob for this device                              | revpi-example-2022 |
+| serial              | number                    | u32               | Serial number of the device                                          | 39485              |
+| edate               | string                    | YYYY-MM-DD        | The date of the end of line test                                     | 2022-09-27         |
+| mac                 | string                    | XX-XX-XX-XX-XX-XX | The first mac address of the device (`:` can be used instead of `-`) | C8-3E-A7-DE-AD-BE  |
+| gpiobanks           | array of gpiobank objects |                   | List of gpiobanks to configure (only bank0 supported at the moment)  |                    |
+| include             | string or JSON object     |                   | Template to use as a base of a definition                            |                    |
 
 ### GPIOBanks object
 
@@ -163,6 +164,10 @@ Controls the pull resistors on each gpio.
 | "up"      | Activate pull up resistor on pin   |
 | "down"    | Activate pull down resistor on pin |
 | "none"    | No pull resitor active on pin      |
+
+### _include_ property
+
+The **include** property has 2 versions. It's either a string that gives the name of the template to include or an object. The allowed properties of the template are only **version**, **eeprom_data_version**, and **gpiobanks**. The version properties need to match the version properties of the definition that includes the template.
 
 ## Validate own JSON files
 
