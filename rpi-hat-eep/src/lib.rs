@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+// SPDX-FileCopyrightText: 2022-2025 KUNBUS GmbH <support@kunbus.com>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -103,10 +103,7 @@ pub struct Eep {
 }
 
 impl Eep {
-    pub fn new(
-        vendor_data: EepAtomVendorData,
-        gpio_map_data: EepAtomGpioMapData,
-    ) -> Eep {
+    pub fn new(vendor_data: EepAtomVendorData, gpio_map_data: EepAtomGpioMapData) -> Eep {
         let atoms: Vec<EepAtom> = vec![
             EepAtom::new_vendor_info(vendor_data),
             EepAtom::new_gpio_bank0_map(gpio_map_data),
@@ -499,7 +496,8 @@ fn test_eep_atom_vendor_data() {
         3u16,
         "ACME Technology Company".to_string(),
         "Special Sensor Board".to_string(),
-    ).unwrap();
+    )
+    .unwrap();
     let mut buf: Vec<u8> = Vec::new();
     data.to_bytes(&mut buf);
     assert_eq!(data.len(), buf.len());

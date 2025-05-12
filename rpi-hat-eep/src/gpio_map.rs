@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+// SPDX-FileCopyrightText: 2022-2025 KUNBUS GmbH <support@kunbus.com>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -176,19 +176,58 @@ impl GpioPin {
 
 #[test]
 fn test_gpio_pin() {
-    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Default, false).to_u8(), 0x00_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Output, GpioPull::Default, false).to_u8(), 0x01_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Alt0, GpioPull::Default, false).to_u8(), 0x04_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Alt1, GpioPull::Default, false).to_u8(), 0x05_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Alt2, GpioPull::Default, false).to_u8(), 0x06_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Alt3, GpioPull::Default, false).to_u8(), 0x07_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Alt4, GpioPull::Default, false).to_u8(), 0x03_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Alt5, GpioPull::Default, false).to_u8(), 0x02_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Up, false).to_u8(), 0x20_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Down, false).to_u8(), 0x40_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::NoPull, false).to_u8(), 0x60_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Input, GpioPull::Default, true).to_u8(), 0x80_u8);
-    assert_eq!(GpioPin::new(GpioFsel::Alt3, GpioPull::NoPull, true).to_u8(), 0xe7_u8);
+    assert_eq!(
+        GpioPin::new(GpioFsel::Input, GpioPull::Default, false).to_u8(),
+        0x00_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Output, GpioPull::Default, false).to_u8(),
+        0x01_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Alt0, GpioPull::Default, false).to_u8(),
+        0x04_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Alt1, GpioPull::Default, false).to_u8(),
+        0x05_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Alt2, GpioPull::Default, false).to_u8(),
+        0x06_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Alt3, GpioPull::Default, false).to_u8(),
+        0x07_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Alt4, GpioPull::Default, false).to_u8(),
+        0x03_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Alt5, GpioPull::Default, false).to_u8(),
+        0x02_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Input, GpioPull::Up, false).to_u8(),
+        0x20_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Input, GpioPull::Down, false).to_u8(),
+        0x40_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Input, GpioPull::NoPull, false).to_u8(),
+        0x60_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Input, GpioPull::Default, true).to_u8(),
+        0x80_u8
+    );
+    assert_eq!(
+        GpioPin::new(GpioFsel::Alt3, GpioPull::NoPull, true).to_u8(),
+        0xe7_u8
+    );
 }
 
 /// This struct implements the GPIO map Atom

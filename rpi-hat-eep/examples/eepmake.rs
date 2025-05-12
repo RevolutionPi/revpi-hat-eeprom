@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 KUNBUS GmbH <support@kunbus.com>
+// SPDX-FileCopyrightText: 2022-2025 KUNBUS GmbH <support@kunbus.com>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -142,9 +142,7 @@ fn parse_config(eep_config: &mut EepConfig, config_str: &str) {
         }
         if let Some(mut data) = custom_data_str {
             if line.starts_with("end") {
-                eep_config
-                    .custom
-                    .extend(hex::decode(data));
+                eep_config.custom.extend(hex::decode(data));
                 custom_data_str = None;
                 continue;
             }
@@ -221,7 +219,9 @@ fn parse_config(eep_config: &mut EepConfig, config_str: &str) {
             }
             .unwrap();
             println!("SETGPIO: {} {:?} {:?}", gpio, func, pull);
-            eep_config.gpios.push((gpio, gpio_map::GpioPin::new(func, pull, true)));
+            eep_config
+                .gpios
+                .push((gpio, gpio_map::GpioPin::new(func, pull, true)));
         } else {
             eprintln!("UNKNOWN");
         }
