@@ -98,10 +98,11 @@ impl TryFrom<&str> for RawRevPiHatEeprom {
     }
 }
 
-/// This struct describs the RevPi HAT EEPROM configuration
+/// This struct describes the RevPi HAT EEPROM configuration.
 ///
-/// This describe the [RevPi HAT EEPROM](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md)
-/// configuration. The struct is used to parse the JSON confirguation with
+/// This describe the [RevPi HAT
+/// EEPROM](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md)
+/// configuration. The struct is used to parse the JSON configuration with
 /// [serde_json](https://docs.serde.rs/serde_json/).
 ///
 /// # Example JSON configuration
