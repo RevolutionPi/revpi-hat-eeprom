@@ -72,6 +72,7 @@ fn gpio_map_atom(config: &EepConfig) -> gpio_map::EepAtomGpioMapData {
     gpio_map
 }
 
+#[derive(Default)]
 struct EepConfig {
     uuid: Option<uuid::Uuid>,
     pid: Option<u16>,
@@ -85,25 +86,6 @@ struct EepConfig {
     gpios: Vec<(u8, gpio_map::GpioPin)>,
     dtb: Option<rpi_hat_eep::LinuxDTB>,
     custom: Vec<Vec<u8>>,
-}
-
-impl Default for EepConfig {
-    fn default() -> Self {
-        EepConfig {
-            uuid: None,
-            pid: None,
-            pver: None,
-            vstr: None,
-            pstr: None,
-            gpio_drive: None,
-            gpio_slew: None,
-            gpio_hyst: None,
-            back_power: None,
-            gpios: Vec::new(),
-            dtb: None,
-            custom: Vec::new(),
-        }
-    }
 }
 
 fn usage(code: i32) {
