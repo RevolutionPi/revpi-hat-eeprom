@@ -122,7 +122,7 @@ fn create_rpi_eep(config: RevPiHatEeprom) -> Result<rpi_hat_eep::Eep, Box<dyn st
     eep.push(EepAtom::new_custom(data))?;
 
     // custom_4
-    let data = EepAtomCustomData::new("0".as_bytes().to_vec());
+    let data = EepAtomCustomData::new(b"0".to_vec());
     eep.push(EepAtom::new_custom(data))?;
 
     // custom_5
