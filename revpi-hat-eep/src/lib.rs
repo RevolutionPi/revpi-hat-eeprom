@@ -162,7 +162,7 @@ impl TryFrom<&str> for RawRevPiHatEeprom {
 /// }
 /// ```
 ///
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct RevPiHatEeprom {
     /// The version of the used [RevPi HAT EEPROM Format](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#0-format-version)

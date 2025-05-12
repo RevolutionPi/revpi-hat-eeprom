@@ -18,7 +18,7 @@ const MAX_GPIOS: usize = BANK0_GPIOS + BANK1_GPIOS;
 /// depends not on this configuration.
 ///
 /// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioBankDrive {
     Default,
@@ -80,7 +80,7 @@ impl From<GpioBankDrive> for gpio_map::GpioDrive {
 /// depends not on this configuration.
 ///
 /// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioBankSlew {
     Default,
@@ -116,7 +116,7 @@ impl From<GpioBankSlew> for gpio_map::GpioSlew {
 /// hysteresis depends not on this configuration.
 ///
 /// For details see: [RevPi HAT EEPROM Format: GPIO map atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioBankHysteresis {
     Default,
@@ -144,7 +144,7 @@ impl From<GpioBankHysteresis> for gpio_map::GpioHysteresis {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioFsel {
     Input,
@@ -187,7 +187,7 @@ impl From<GpioFsel> for gpio_map::GpioFsel {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum GpioPull {
     Default,
@@ -233,7 +233,7 @@ impl From<GpioPull> for gpio_map::GpioPull {
 /// leavs only the first 28 gpios. The gpios 0 and 1 are used for the HAT EEPROM
 /// and should not be changed. The gpio bank validation will not allow to modify
 /// the gpios 0 and 1 also the gpios higher then 27.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct GpioPin {
     gpio: u8,
@@ -249,7 +249,7 @@ pub struct GpioPin {
 /// EEPROM configuration in json format. See [RevPi HAT EEPROM Format: GPIO map
 /// atom data](https://github.com/RevolutionPi/revpi-hat-eeprom/blob/master/docs/RevPi-HAT-EEPROM-Format.md#gpio-map-atom-data-type0x0002)
 /// for details about the meaning of the values in this struct.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct GpioBank {
     drive: GpioBankDrive,
