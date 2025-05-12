@@ -317,15 +317,7 @@ impl GpioBank {
         }
         Ok(())
     }
-}
 
-impl Display for GpioBank {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-impl GpioBank {
     pub fn into_gpio_map(
         self,
         bank: gpio_map::GpioBank,
@@ -345,5 +337,11 @@ impl GpioBank {
             )?;
         }
         Ok(gpio_map)
+    }
+}
+
+impl Display for GpioBank {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
