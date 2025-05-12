@@ -327,7 +327,7 @@ pub struct EepAtom {
 const ATOM_CRC16: Crc<u16> = Crc::<u16>::new(&CRC_16_ARC);
 
 impl EepAtom {
-    pub fn new_vendor_info(data: EepAtomVendorData) -> EepAtom {
+    pub const fn new_vendor_info(data: EepAtomVendorData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::VendorInfo,
             count: 0,
@@ -335,7 +335,7 @@ impl EepAtom {
         }
     }
 
-    pub fn new_gpio_bank0_map(data: EepAtomGpioMapData) -> EepAtom {
+    pub const fn new_gpio_bank0_map(data: EepAtomGpioMapData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::GpioBank0Map,
             count: 1,
@@ -343,7 +343,7 @@ impl EepAtom {
         }
     }
 
-    pub fn new_linux_dtb(data: EepAtomLinuxDTBData) -> EepAtom {
+    pub const fn new_linux_dtb(data: EepAtomLinuxDTBData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::LinuxDTB,
             count: 2,
@@ -351,7 +351,7 @@ impl EepAtom {
         }
     }
 
-    pub fn new_custom(data: EepAtomCustomData) -> EepAtom {
+    pub const fn new_custom(data: EepAtomCustomData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::ManufCustomData,
             count: 0xffff,
@@ -359,7 +359,7 @@ impl EepAtom {
         }
     }
 
-    pub fn new_gpio_bank1_map(data: EepAtomGpioMapData) -> EepAtom {
+    pub const fn new_gpio_bank1_map(data: EepAtomGpioMapData) -> EepAtom {
         EepAtom {
             atype: EepAtomType::GpioBank1Map,
             count: 1,
@@ -533,7 +533,7 @@ pub struct EepAtomLinuxDTBData {
 }
 
 impl EepAtomLinuxDTBData {
-    pub fn new(data: LinuxDTB) -> EepAtomLinuxDTBData {
+    pub const fn new(data: LinuxDTB) -> EepAtomLinuxDTBData {
         EepAtomLinuxDTBData { data }
     }
 }
@@ -560,7 +560,7 @@ pub struct EepAtomCustomData {
 }
 
 impl EepAtomCustomData {
-    pub fn new(data: Vec<u8>) -> EepAtomCustomData {
+    pub const fn new(data: Vec<u8>) -> EepAtomCustomData {
         EepAtomCustomData { data }
     }
 }

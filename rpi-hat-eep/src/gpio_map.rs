@@ -163,11 +163,11 @@ pub struct GpioPin {
 }
 
 impl GpioPin {
-    pub fn new(fsel: GpioFsel, pull: GpioPull, used: bool) -> GpioPin {
+    pub const fn new(fsel: GpioFsel, pull: GpioPull, used: bool) -> GpioPin {
         GpioPin { fsel, pull, used }
     }
 
-    fn to_u8(&self) -> u8 {
+    const fn to_u8(&self) -> u8 {
         let fsel = self.fsel as u8;
         let pull = self.pull as u8;
         (fsel & 0x07) | (pull & 0x03) << 5 | (self.used as u8) << 7
