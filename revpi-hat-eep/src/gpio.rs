@@ -309,7 +309,7 @@ impl GpioBank {
             }
             if configured_gpios[gpio.gpio as usize] {
                 return Err(ValidationError(format!(
-                    "gpio#: {} defined more then once",
+                    "gpio#: {} defined more than once",
                     gpio.gpio
                 )));
             }
