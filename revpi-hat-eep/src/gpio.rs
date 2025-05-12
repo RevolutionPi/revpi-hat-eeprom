@@ -43,15 +43,15 @@ pub enum GpioBankDrive {
 impl From<gpio_map::GpioDrive> for GpioBankDrive {
     fn from(drive: gpio_map::GpioDrive) -> Self {
         match drive {
-            gpio_map::GpioDrive::Default => GpioBankDrive::Default,
-            gpio_map::GpioDrive::Drive2mA => GpioBankDrive::Drive2mA,
-            gpio_map::GpioDrive::Drive4mA => GpioBankDrive::Drive4mA,
-            gpio_map::GpioDrive::Drive6mA => GpioBankDrive::Drive6mA,
-            gpio_map::GpioDrive::Drive8mA => GpioBankDrive::Drive8mA,
-            gpio_map::GpioDrive::Drive10mA => GpioBankDrive::Drive10mA,
-            gpio_map::GpioDrive::Drive12mA => GpioBankDrive::Drive12mA,
-            gpio_map::GpioDrive::Drive14mA => GpioBankDrive::Drive14mA,
-            gpio_map::GpioDrive::Drive16mA => GpioBankDrive::Drive16mA,
+            gpio_map::GpioDrive::Default => Self::Default,
+            gpio_map::GpioDrive::Drive2mA => Self::Drive2mA,
+            gpio_map::GpioDrive::Drive4mA => Self::Drive4mA,
+            gpio_map::GpioDrive::Drive6mA => Self::Drive6mA,
+            gpio_map::GpioDrive::Drive8mA => Self::Drive8mA,
+            gpio_map::GpioDrive::Drive10mA => Self::Drive10mA,
+            gpio_map::GpioDrive::Drive12mA => Self::Drive12mA,
+            gpio_map::GpioDrive::Drive14mA => Self::Drive14mA,
+            gpio_map::GpioDrive::Drive16mA => Self::Drive16mA,
         }
     }
 }
@@ -59,15 +59,15 @@ impl From<gpio_map::GpioDrive> for GpioBankDrive {
 impl From<GpioBankDrive> for gpio_map::GpioDrive {
     fn from(drive: GpioBankDrive) -> Self {
         match drive {
-            GpioBankDrive::Default => gpio_map::GpioDrive::Default,
-            GpioBankDrive::Drive2mA => gpio_map::GpioDrive::Drive2mA,
-            GpioBankDrive::Drive4mA => gpio_map::GpioDrive::Drive4mA,
-            GpioBankDrive::Drive6mA => gpio_map::GpioDrive::Drive6mA,
-            GpioBankDrive::Drive8mA => gpio_map::GpioDrive::Drive8mA,
-            GpioBankDrive::Drive10mA => gpio_map::GpioDrive::Drive10mA,
-            GpioBankDrive::Drive12mA => gpio_map::GpioDrive::Drive12mA,
-            GpioBankDrive::Drive14mA => gpio_map::GpioDrive::Drive14mA,
-            GpioBankDrive::Drive16mA => gpio_map::GpioDrive::Drive16mA,
+            GpioBankDrive::Default => Self::Default,
+            GpioBankDrive::Drive2mA => Self::Drive2mA,
+            GpioBankDrive::Drive4mA => Self::Drive4mA,
+            GpioBankDrive::Drive6mA => Self::Drive6mA,
+            GpioBankDrive::Drive8mA => Self::Drive8mA,
+            GpioBankDrive::Drive10mA => Self::Drive10mA,
+            GpioBankDrive::Drive12mA => Self::Drive12mA,
+            GpioBankDrive::Drive14mA => Self::Drive14mA,
+            GpioBankDrive::Drive16mA => Self::Drive16mA,
         }
     }
 }
@@ -91,9 +91,9 @@ pub enum GpioBankSlew {
 impl From<gpio_map::GpioSlew> for GpioBankSlew {
     fn from(slew: gpio_map::GpioSlew) -> Self {
         match slew {
-            gpio_map::GpioSlew::Default => GpioBankSlew::Default,
-            gpio_map::GpioSlew::RateLimiting => GpioBankSlew::RateLimiting,
-            gpio_map::GpioSlew::NoLimit => GpioBankSlew::NoLimit,
+            gpio_map::GpioSlew::Default => Self::Default,
+            gpio_map::GpioSlew::RateLimiting => Self::RateLimiting,
+            gpio_map::GpioSlew::NoLimit => Self::NoLimit,
         }
     }
 }
@@ -101,9 +101,9 @@ impl From<gpio_map::GpioSlew> for GpioBankSlew {
 impl From<GpioBankSlew> for gpio_map::GpioSlew {
     fn from(slew: GpioBankSlew) -> Self {
         match slew {
-            GpioBankSlew::Default => gpio_map::GpioSlew::Default,
-            GpioBankSlew::RateLimiting => gpio_map::GpioSlew::RateLimiting,
-            GpioBankSlew::NoLimit => gpio_map::GpioSlew::NoLimit,
+            GpioBankSlew::Default => Self::Default,
+            GpioBankSlew::RateLimiting => Self::RateLimiting,
+            GpioBankSlew::NoLimit => Self::NoLimit,
         }
     }
 }
@@ -127,9 +127,9 @@ pub enum GpioBankHysteresis {
 impl From<gpio_map::GpioHysteresis> for GpioBankHysteresis {
     fn from(hyst: gpio_map::GpioHysteresis) -> Self {
         match hyst {
-            gpio_map::GpioHysteresis::Default => GpioBankHysteresis::Default,
-            gpio_map::GpioHysteresis::Disable => GpioBankHysteresis::Disable,
-            gpio_map::GpioHysteresis::Enable => GpioBankHysteresis::Enable,
+            gpio_map::GpioHysteresis::Default => Self::Default,
+            gpio_map::GpioHysteresis::Disable => Self::Disable,
+            gpio_map::GpioHysteresis::Enable => Self::Enable,
         }
     }
 }
@@ -137,9 +137,9 @@ impl From<gpio_map::GpioHysteresis> for GpioBankHysteresis {
 impl From<GpioBankHysteresis> for gpio_map::GpioHysteresis {
     fn from(hyst: GpioBankHysteresis) -> Self {
         match hyst {
-            GpioBankHysteresis::Default => gpio_map::GpioHysteresis::Default,
-            GpioBankHysteresis::Disable => gpio_map::GpioHysteresis::Disable,
-            GpioBankHysteresis::Enable => gpio_map::GpioHysteresis::Enable,
+            GpioBankHysteresis::Default => Self::Default,
+            GpioBankHysteresis::Disable => Self::Disable,
+            GpioBankHysteresis::Enable => Self::Enable,
         }
     }
 }
@@ -160,14 +160,14 @@ pub enum GpioFsel {
 impl From<gpio_map::GpioFsel> for GpioFsel {
     fn from(fsel: gpio_map::GpioFsel) -> Self {
         match fsel {
-            gpio_map::GpioFsel::Input => GpioFsel::Input,
-            gpio_map::GpioFsel::Output => GpioFsel::Output,
-            gpio_map::GpioFsel::Alt0 => GpioFsel::Alt0,
-            gpio_map::GpioFsel::Alt1 => GpioFsel::Alt1,
-            gpio_map::GpioFsel::Alt2 => GpioFsel::Alt2,
-            gpio_map::GpioFsel::Alt3 => GpioFsel::Alt3,
-            gpio_map::GpioFsel::Alt4 => GpioFsel::Alt4,
-            gpio_map::GpioFsel::Alt5 => GpioFsel::Alt5,
+            gpio_map::GpioFsel::Input => Self::Input,
+            gpio_map::GpioFsel::Output => Self::Output,
+            gpio_map::GpioFsel::Alt0 => Self::Alt0,
+            gpio_map::GpioFsel::Alt1 => Self::Alt1,
+            gpio_map::GpioFsel::Alt2 => Self::Alt2,
+            gpio_map::GpioFsel::Alt3 => Self::Alt3,
+            gpio_map::GpioFsel::Alt4 => Self::Alt4,
+            gpio_map::GpioFsel::Alt5 => Self::Alt5,
         }
     }
 }
@@ -175,14 +175,14 @@ impl From<gpio_map::GpioFsel> for GpioFsel {
 impl From<GpioFsel> for gpio_map::GpioFsel {
     fn from(fsel: GpioFsel) -> Self {
         match fsel {
-            GpioFsel::Input => gpio_map::GpioFsel::Input,
-            GpioFsel::Output => gpio_map::GpioFsel::Output,
-            GpioFsel::Alt0 => gpio_map::GpioFsel::Alt0,
-            GpioFsel::Alt1 => gpio_map::GpioFsel::Alt1,
-            GpioFsel::Alt2 => gpio_map::GpioFsel::Alt2,
-            GpioFsel::Alt3 => gpio_map::GpioFsel::Alt3,
-            GpioFsel::Alt4 => gpio_map::GpioFsel::Alt4,
-            GpioFsel::Alt5 => gpio_map::GpioFsel::Alt5,
+            GpioFsel::Input => Self::Input,
+            GpioFsel::Output => Self::Output,
+            GpioFsel::Alt0 => Self::Alt0,
+            GpioFsel::Alt1 => Self::Alt1,
+            GpioFsel::Alt2 => Self::Alt2,
+            GpioFsel::Alt3 => Self::Alt3,
+            GpioFsel::Alt4 => Self::Alt4,
+            GpioFsel::Alt5 => Self::Alt5,
         }
     }
 }
@@ -199,10 +199,10 @@ pub enum GpioPull {
 impl From<gpio_map::GpioPull> for GpioPull {
     fn from(pull: gpio_map::GpioPull) -> Self {
         match pull {
-            gpio_map::GpioPull::Default => GpioPull::Default,
-            gpio_map::GpioPull::Up => GpioPull::Up,
-            gpio_map::GpioPull::Down => GpioPull::Down,
-            gpio_map::GpioPull::NoPull => GpioPull::None,
+            gpio_map::GpioPull::Default => Self::Default,
+            gpio_map::GpioPull::Up => Self::Up,
+            gpio_map::GpioPull::Down => Self::Down,
+            gpio_map::GpioPull::NoPull => Self::None,
         }
     }
 }
@@ -210,10 +210,10 @@ impl From<gpio_map::GpioPull> for GpioPull {
 impl From<GpioPull> for gpio_map::GpioPull {
     fn from(pull: GpioPull) -> Self {
         match pull {
-            GpioPull::Default => gpio_map::GpioPull::Default,
-            GpioPull::Up => gpio_map::GpioPull::Up,
-            GpioPull::Down => gpio_map::GpioPull::Down,
-            GpioPull::None => gpio_map::GpioPull::NoPull,
+            GpioPull::Default => Self::Default,
+            GpioPull::Up => Self::Up,
+            GpioPull::Down => Self::Down,
+            GpioPull::None => Self::NoPull,
         }
     }
 }

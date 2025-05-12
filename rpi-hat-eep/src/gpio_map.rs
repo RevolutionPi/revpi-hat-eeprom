@@ -16,7 +16,7 @@ enum GpioErrorType {
 impl std::fmt::Display for GpioErrorType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            GpioErrorType::OutOfBound => "GPIO index out of bound",
+            Self::OutOfBound => "GPIO index out of bound",
         };
         write!(f, "{}", s)
     }
@@ -46,8 +46,8 @@ pub enum GpioBank {
 impl std::fmt::Display for GpioBank {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let bank = match self {
-            GpioBank::Bank0 => "Bank0",
-            GpioBank::Bank1 => "Bank1",
+            Self::Bank0 => "Bank0",
+            Self::Bank1 => "Bank1",
         };
         write!(f, "{}", bank)
     }
@@ -163,8 +163,8 @@ pub struct GpioPin {
 }
 
 impl GpioPin {
-    pub const fn new(fsel: GpioFsel, pull: GpioPull, used: bool) -> GpioPin {
-        GpioPin { fsel, pull, used }
+    pub const fn new(fsel: GpioFsel, pull: GpioPull, used: bool) -> Self {
+        Self { fsel, pull, used }
     }
 
     const fn to_u8(&self) -> u8 {
@@ -271,12 +271,12 @@ impl EepAtomGpioMapData {
         slew: GpioSlew,
         hysteresis: GpioHysteresis,
         back_power: GpioBackPower,
-    ) -> EepAtomGpioMapData {
+    ) -> Self {
         let gpios = match bank {
             GpioBank::Bank0 => vec![GpioPin::default(); BANK0_GPIOS],
             GpioBank::Bank1 => vec![GpioPin::default(); BANK1_GPIOS],
         };
-        EepAtomGpioMapData {
+        Self {
             bank,
             drive,
             slew,

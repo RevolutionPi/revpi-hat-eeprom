@@ -53,10 +53,10 @@ pub enum EepPushError {
 impl std::fmt::Display for EepPushError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            EepPushError::MaxAtomCountExceeded => {
+            Self::MaxAtomCountExceeded => {
                 write!(f, "The maximum Atom count {} was exceeded", u16::MAX)
             }
-            EepPushError::WrongAtomOrder {
+            Self::WrongAtomOrder {
                 atype,
                 prev,
                 expected,
@@ -102,12 +102,12 @@ pub struct Eep {
 }
 
 impl Eep {
-    pub fn new(vendor_data: EepAtomVendorData, gpio_map_data: EepAtomGpioMapData) -> Eep {
+    pub fn new(vendor_data: EepAtomVendorData, gpio_map_data: EepAtomGpioMapData) -> Self {
         let atoms: Vec<EepAtom> = vec![
             EepAtom::new_vendor_info(vendor_data),
             EepAtom::new_gpio_bank0_map(gpio_map_data),
         ];
-        Eep { atoms }
+        Self { atoms }
     }
 
     pub fn push(&mut self, mut atom: EepAtom) -> Result<(), EepPushError> {
@@ -241,20 +241,20 @@ pub enum EepAtomData {
 impl ToBytes for EepAtomData {
     fn len(&self) -> usize {
         match self {
-            EepAtomData::VendorInfo(data) => data.len(),
-            EepAtomData::GpioBank0Map(data) => data.len(),
-            EepAtomData::LinuxDTB(data) => data.len(),
-            EepAtomData::ManufCustomData(data) => data.len(),
-            EepAtomData::GpioBank1Map(data) => data.len(),
+            Self::VendorInfo(data) => data.len(),
+            Self::GpioBank0Map(data) => data.len(),
+            Self::LinuxDTB(data) => data.len(),
+            Self::ManufCustomData(data) => data.len(),
+            Self::GpioBank1Map(data) => data.len(),
         }
     }
     fn to_bytes(&self, buf: &mut Vec<u8>) {
         match self {
-            EepAtomData::VendorInfo(data) => data.to_bytes(buf),
-            EepAtomData::GpioBank0Map(data) => data.to_bytes(buf),
-            EepAtomData::LinuxDTB(data) => data.to_bytes(buf),
-            EepAtomData::ManufCustomData(data) => data.to_bytes(buf),
-            EepAtomData::GpioBank1Map(data) => data.to_bytes(buf),
+            Self::VendorInfo(data) => data.to_bytes(buf),
+            Self::GpioBank0Map(data) => data.to_bytes(buf),
+            Self::LinuxDTB(data) => data.to_bytes(buf),
+            Self::ManufCustomData(data) => data.to_bytes(buf),
+            Self::GpioBank1Map(data) => data.to_bytes(buf),
         };
     }
 }
@@ -290,11 +290,11 @@ impl std::fmt::Display for EepAtomType {
             f,
             "{}",
             match self {
-                EepAtomType::VendorInfo => "vendor info",
-                EepAtomType::GpioBank0Map => "GPIO (bank 0) map",
-                EepAtomType::LinuxDTB => "Linux device tree blob",
-                EepAtomType::ManufCustomData => "manufacturer custom data",
-                EepAtomType::GpioBank1Map => "GPIO (bank 1) map",
+                Self::VendorInfo => "vendor info",
+                Self::GpioBank0Map => "GPIO (bank 0) map",
+                Self::LinuxDTB => "Linux device tree blob",
+                Self::ManufCustomData => "manufacturer custom data",
+                Self::GpioBank1Map => "GPIO (bank 1) map",
             }
         )
     }
@@ -327,40 +327,40 @@ pub struct EepAtom {
 const ATOM_CRC16: Crc<u16> = Crc::<u16>::new(&CRC_16_ARC);
 
 impl EepAtom {
-    pub const fn new_vendor_info(data: EepAtomVendorData) -> EepAtom {
-        EepAtom {
+    pub const fn new_vendor_info(data: EepAtomVendorData) -> Self {
+        Self {
             atype: EepAtomType::VendorInfo,
             count: 0,
             data: EepAtomData::VendorInfo(data),
         }
     }
 
-    pub const fn new_gpio_bank0_map(data: EepAtomGpioMapData) -> EepAtom {
-        EepAtom {
+    pub const fn new_gpio_bank0_map(data: EepAtomGpioMapData) -> Self {
+        Self {
             atype: EepAtomType::GpioBank0Map,
             count: 1,
             data: EepAtomData::GpioBank0Map(data),
         }
     }
 
-    pub const fn new_linux_dtb(data: EepAtomLinuxDTBData) -> EepAtom {
-        EepAtom {
+    pub const fn new_linux_dtb(data: EepAtomLinuxDTBData) -> Self {
+        Self {
             atype: EepAtomType::LinuxDTB,
             count: 2,
             data: EepAtomData::LinuxDTB(data),
         }
     }
 
-    pub const fn new_custom(data: EepAtomCustomData) -> EepAtom {
-        EepAtom {
+    pub const fn new_custom(data: EepAtomCustomData) -> Self {
+        Self {
             atype: EepAtomType::ManufCustomData,
             count: 0xffff,
             data: EepAtomData::ManufCustomData(data),
         }
     }
 
-    pub const fn new_gpio_bank1_map(data: EepAtomGpioMapData) -> EepAtom {
-        EepAtom {
+    pub const fn new_gpio_bank1_map(data: EepAtomGpioMapData) -> Self {
+        Self {
             atype: EepAtomType::GpioBank1Map,
             count: 1,
             data: EepAtomData::GpioBank1Map(data),
@@ -430,7 +430,7 @@ impl EepAtomVendorData {
         pver: u16,
         vstr: String,
         pstr: String,
-    ) -> Result<EepAtomVendorData, EepError> {
+    ) -> Result<Self, EepError> {
         if vstr.len() > u8::MAX as usize {
             return Err(EepError(format!(
                 "Vendor string too long: {} (max: {} bytes)",
@@ -445,7 +445,7 @@ impl EepAtomVendorData {
                 u8::MAX
             )));
         }
-        Ok(EepAtomVendorData {
+        Ok(Self {
             uuid,
             pid,
             pver,
@@ -533,8 +533,8 @@ pub struct EepAtomLinuxDTBData {
 }
 
 impl EepAtomLinuxDTBData {
-    pub const fn new(data: LinuxDTB) -> EepAtomLinuxDTBData {
-        EepAtomLinuxDTBData { data }
+    pub const fn new(data: LinuxDTB) -> Self {
+        Self { data }
     }
 }
 
@@ -560,8 +560,8 @@ pub struct EepAtomCustomData {
 }
 
 impl EepAtomCustomData {
-    pub const fn new(data: Vec<u8>) -> EepAtomCustomData {
-        EepAtomCustomData { data }
+    pub const fn new(data: Vec<u8>) -> Self {
+        Self { data }
     }
 }
 
