@@ -322,3 +322,327 @@ impl RevPiHatEeprom {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs::{self, create_dir};
+
+    use super::*;
+    use sealed_test::prelude::*;
+
+    #[test]
+    fn test_same_versions_definition_template() -> Result<(), Box<dyn std::error::Error>> {
+        let template = TemplateDefinition {
+            version: 1,
+            eeprom_data_version: 1,
+            gpiobanks: vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )],
+        };
+
+        let raw_definition = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 1,
+            vstr: String::new(),
+            pstr: String::new(),
+            pid: 1,
+            prev: 1,
+            pver: 1,
+            dtstr: String::new(),
+            serial: None,
+            edate: None,
+            mac: None,
+            gpiobanks: None,
+            include: Some(TemplateInclude::Object(template)),
+        };
+
+        RevPiHatEeprom::from_raw_definition(&PathBuf::new(), raw_definition)?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_different_versions_definition_template() -> Result<(), Box<dyn std::error::Error>> {
+        let template = TemplateDefinition {
+            version: 2,
+            eeprom_data_version: 1,
+            gpiobanks: vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )],
+        };
+
+        let raw_definition = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 1,
+            vstr: String::new(),
+            pstr: String::new(),
+            pid: 1,
+            prev: 1,
+            pver: 1,
+            dtstr: String::new(),
+            serial: None,
+            edate: None,
+            mac: None,
+            gpiobanks: None,
+            include: Some(TemplateInclude::Object(template)),
+        };
+
+        RevPiHatEeprom::from_raw_definition(&PathBuf::new(), raw_definition).unwrap_err();
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_redundant_template() -> Result<(), Box<dyn std::error::Error>> {
+        let template = TemplateDefinition {
+            version: 1,
+            eeprom_data_version: 1,
+            gpiobanks: vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )],
+        };
+
+        let raw_definition = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 1,
+            vstr: String::new(),
+            pstr: String::new(),
+            pid: 1,
+            prev: 1,
+            pver: 1,
+            dtstr: String::new(),
+            serial: None,
+            edate: None,
+            mac: None,
+            gpiobanks: Some(vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )]),
+            include: Some(TemplateInclude::Object(template)),
+        };
+
+        RevPiHatEeprom::from_raw_definition(&PathBuf::new(), raw_definition).unwrap_err();
+
+        Ok(())
+    }
+
+    #[sealed_test]
+    fn test_templates_folder() -> Result<(), Box<dyn std::error::Error>> {
+        let expected = RevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )],
+        };
+        let raw_config = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: None,
+            include: Some(TemplateInclude::Filename("test.json".into())),
+        };
+        let template = r#"
+        {
+            "version": 1,
+            "eeprom_data_version": 3,
+            "gpiobanks": [
+                {
+                    "drive": "8mA",
+                    "slew": "default",
+                    "hysteresis": "default",
+                    "gpios": []
+                }
+            ]
+        }
+        "#;
+        create_dir("templates")?;
+        fs::write("templates/test.json", template)?;
+
+        let eep = RevPiHatEeprom::from_raw_definition(
+            &std::env::current_dir()?.join("templates"),
+            raw_config,
+        )?;
+
+        assert_eq!(eep, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_raw_without_template() -> Result<(), Box<dyn std::error::Error>> {
+        let expected = RevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )],
+        };
+        let raw_config = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: Some(vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )]),
+            include: None,
+        };
+        assert_eq!(
+            RevPiHatEeprom::from_raw_definition(&PathBuf::new(), raw_config)?,
+            expected
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_raw_no_gpiobanks() -> Result<(), Box<dyn std::error::Error>> {
+        let raw_config = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: None,
+            include: None,
+        };
+        RevPiHatEeprom::from_raw_definition(&PathBuf::new(), raw_config).unwrap_err();
+
+        Ok(())
+    }
+
+    #[sealed_test]
+    fn test_template_dir_not_present() -> Result<(), Box<dyn std::error::Error>> {
+        let raw_config = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: None,
+            include: Some(TemplateInclude::Filename("nonexistent.json".into())),
+        };
+        RevPiHatEeprom::from_raw_definition(
+            &std::env::current_dir()?.join("non-existent"),
+            raw_config,
+        )
+        .unwrap_err();
+
+        Ok(())
+    }
+
+    #[sealed_test]
+    fn test_template_not_present() -> Result<(), Box<dyn std::error::Error>> {
+        let raw_config = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: None,
+            include: Some(TemplateInclude::Filename("nonexistent.json".into())),
+        };
+        let templates_path = std::env::current_dir()?.join("templates");
+        create_dir(&templates_path)?;
+        RevPiHatEeprom::from_raw_definition(&templates_path, raw_config).unwrap_err();
+
+        Ok(())
+    }
+
+    #[sealed_test]
+    fn test_empty_template() -> Result<(), Box<dyn std::error::Error>> {
+        let raw_config = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: None,
+            include: Some(TemplateInclude::Filename("empty.json".into())),
+        };
+        let templates_path = std::env::current_dir()?.join("templates");
+        create_dir(&templates_path)?;
+        std::fs::write(templates_path.join("empty.json"), "")?;
+        RevPiHatEeprom::from_raw_definition(&templates_path, raw_config).unwrap_err();
+
+        Ok(())
+    }
+}
