@@ -50,6 +50,7 @@ impl TemplateDefinition {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[non_exhaustive]
+#[serde(untagged)]
 /// Definition of how to include a [`TemplateDefinition`].
 ///
 /// The template may be included either as a [`TemplateInclude::Filename`] or as a
