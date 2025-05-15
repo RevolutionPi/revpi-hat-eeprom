@@ -647,4 +647,61 @@ mod tests {
 
         Ok(())
     }
+
+    #[sealed_test]
+    fn test_untagged_include_property() -> Result<(), Box<dyn std::error::Error>> {
+        let expected = RevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: 3,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )],
+        };
+        let raw_config = r#"
+        {
+            "version": 1,
+            "eeprom_data_version": 3,
+            "vstr": "KUNBUS GmbH",
+            "pstr": "RevPi Test",
+            "pid": 666,
+            "prev": 3,
+            "pver": 333,
+            "dtstr": "revpi-test",
+            "include": "include.json"
+        }
+        "#;
+        let template = r#"
+        {
+            "version": 1,
+            "eeprom_data_version": 3,
+            "gpiobanks": [
+                {
+                    "drive": "8mA",
+                    "slew": "default",
+                    "hysteresis": "default",
+                    "gpios": []
+                }
+            ]
+        }
+        "#;
+        let templates_dir = std::env::current_dir()?.join("templates");
+        create_dir(&templates_dir)?;
+        fs::write(templates_dir.join("include.json"), template)?;
+        let output = RevPiHatEeprom::from_config_str(&templates_dir, raw_config)?;
+        assert_eq!(expected, output);
+
+        Ok(())
+    }
 }
