@@ -216,8 +216,11 @@ fn main() {
     };
 
     let mut config = match revpi_hat_eep::RevPiHatEeprom::from_config_str(
-        &cli.template_dir
-            .unwrap_or_else(|| std::env::current_dir().expect("Unable to get current directory")),
+        &cli.template_dir.unwrap_or_else(|| {
+            std::env::current_dir()
+                .expect("Unable to get current directory")
+                .join("templates")
+        }),
         &config,
     ) {
         Ok(config) => config,
