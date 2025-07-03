@@ -30,13 +30,15 @@ impl std::fmt::Display for ValidationError {
 /// if the field [`RawRevPiHatEeprom::include`] is given.
 ///
 /// The template defines only fields that may be overridden. Additionally, to be a valid template
-/// and be allowed to be included in a [`RawRevPiHatEeprom`] in the first place, the fields
-/// [`TemplateDefinition::version`] and [`TemplateDefinition::eeprom_data_version`] must match the
-/// fields [`RawRevPiHatEeprom::version`] and [`RawRevPiHatEeprom::eeprom_data_version`]
-/// respectively, otherwise it's an invalid template inclusion and should produce an error.
+/// and be allowed to be included in a [`RawRevPiHatEeprom`] in the first place, the field
+/// [`TemplateDefinition::version`]  must match the field [`RawRevPiHatEeprom::version`] ,
+/// otherwise it's an invalid template inclusion and should produce an error.
+///
+/// The field [`TemplateDefinition::eeprom_data_version`] can be given in the template as well to
+/// override the [`RawRevPiHatEeprom::eeprom_data_version`] field in the base file.
 pub struct TemplateDefinition {
     pub version: u16,
-    pub eeprom_data_version: u16,
+    pub eeprom_data_version: Option<u16>,
     pub gpiobanks: Vec<GpioBank>,
 }
 
@@ -76,7 +78,7 @@ pub enum TemplateInclude {
 /// [`TemplateDefinition`] as the [`TemplateDefinition`] is unnecessary in this case.
 pub struct RawRevPiHatEeprom {
     pub version: u16,
-    pub eeprom_data_version: u16,
+    pub eeprom_data_version: Option<u16>,
     pub vstr: String,
     pub pstr: String,
     pub pid: u16,
@@ -219,10 +221,16 @@ impl RevPiHatEeprom {
         raw_definition: RawRevPiHatEeprom,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let Some(include) = raw_definition.include else {
+            let Some(eeprom_data_version) = raw_definition.eeprom_data_version else {
+                return Err(Box::new(ValidationError(
+                    "Field eeprom_data_version has to be given if no template is included"
+                        .to_string(),
+                )));
+            };
             if let Some(gpiobanks) = raw_definition.gpiobanks {
                 return Ok(Self {
                     version: raw_definition.version,
-                    eeprom_data_version: raw_definition.eeprom_data_version,
+                    eeprom_data_version,
                     vstr: raw_definition.vstr,
                     pstr: raw_definition.pstr,
                     pid: raw_definition.pid,
@@ -242,7 +250,7 @@ impl RevPiHatEeprom {
         };
 
         // check if all fields in the template are overridden
-        if raw_definition.gpiobanks.is_some() {
+        if raw_definition.gpiobanks.is_some() && raw_definition.eeprom_data_version.is_some() {
             return Err(Box::new(ValidationError(
                 "All fields of the template are overridden, template is useless".to_string(),
             )));
@@ -253,17 +261,30 @@ impl RevPiHatEeprom {
             TemplateInclude::Object(def) => def,
         };
 
-        if raw_definition.version != def.version
-            || raw_definition.eeprom_data_version != def.eeprom_data_version
-        {
+        let eeprom_data_version = raw_definition
+            .eeprom_data_version
+            .or(def.eeprom_data_version)
+            .ok_or_else(|| {
+                Box::new(ValidationError(
+                    "No eeprom_data_version defined in base file or template".to_string(),
+                ))
+            })?;
+
+        if raw_definition.eeprom_data_version.is_none() && def.eeprom_data_version.is_none() {
             return Err(Box::new(ValidationError(
-                "Version fields of definition and template have to match".to_string(),
+                "No eeprom_data_version is given".to_string(),
+            )));
+        }
+
+        if raw_definition.version != def.version {
+            return Err(Box::new(ValidationError(
+                "Version field of definition and template have to match".to_string(),
             )));
         }
 
         let definition = Self {
             version: raw_definition.version,
-            eeprom_data_version: raw_definition.eeprom_data_version,
+            eeprom_data_version,
             vstr: raw_definition.vstr,
             pstr: raw_definition.pstr,
             pid: raw_definition.pid,
@@ -336,7 +357,7 @@ mod tests {
     fn test_same_versions_definition_template() -> Result<(), Box<dyn std::error::Error>> {
         let template = TemplateDefinition {
             version: 1,
-            eeprom_data_version: 1,
+            eeprom_data_version: Some(1),
             gpiobanks: vec![GpioBank::new(
                 gpio::GpioBankDrive::Drive8mA,
                 gpio::GpioBankSlew::Default,
@@ -347,7 +368,7 @@ mod tests {
 
         let raw_definition = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 1,
+            eeprom_data_version: Some(1),
             vstr: String::new(),
             pstr: String::new(),
             pid: 1,
@@ -370,7 +391,7 @@ mod tests {
     fn test_different_versions_definition_template() -> Result<(), Box<dyn std::error::Error>> {
         let template = TemplateDefinition {
             version: 2,
-            eeprom_data_version: 1,
+            eeprom_data_version: Some(1),
             gpiobanks: vec![GpioBank::new(
                 gpio::GpioBankDrive::Drive8mA,
                 gpio::GpioBankSlew::Default,
@@ -381,7 +402,7 @@ mod tests {
 
         let raw_definition = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 1,
+            eeprom_data_version: Some(1),
             vstr: String::new(),
             pstr: String::new(),
             pid: 1,
@@ -401,10 +422,11 @@ mod tests {
     }
 
     #[test]
-    fn test_redundant_template() -> Result<(), Box<dyn std::error::Error>> {
+    fn test_different_eeprom_data_versions_definition_template(
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let template = TemplateDefinition {
             version: 1,
-            eeprom_data_version: 1,
+            eeprom_data_version: Some(1),
             gpiobanks: vec![GpioBank::new(
                 gpio::GpioBankDrive::Drive8mA,
                 gpio::GpioBankSlew::Default,
@@ -415,7 +437,42 @@ mod tests {
 
         let raw_definition = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 1,
+            eeprom_data_version: Some(2),
+            vstr: String::new(),
+            pstr: String::new(),
+            pid: 1,
+            prev: 1,
+            pver: 1,
+            dtstr: String::new(),
+            serial: None,
+            edate: None,
+            mac: None,
+            gpiobanks: None,
+            include: Some(TemplateInclude::Object(template)),
+        };
+
+        let res = RevPiHatEeprom::from_raw_definition(&PathBuf::new(), raw_definition).unwrap();
+        assert_eq!(res.eeprom_data_version, 2);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_redundant_template() -> Result<(), Box<dyn std::error::Error>> {
+        let template = TemplateDefinition {
+            version: 1,
+            eeprom_data_version: Some(1),
+            gpiobanks: vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )],
+        };
+
+        let raw_definition = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: Some(1),
             vstr: String::new(),
             pstr: String::new(),
             pid: 1,
@@ -462,7 +519,7 @@ mod tests {
         };
         let raw_config = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 3,
+            eeprom_data_version: Some(3),
             vstr: "KUNBUS GmbH".to_string(),
             pstr: "RevPi Test".to_string(),
             pid: 666,
@@ -525,7 +582,7 @@ mod tests {
         };
         let raw_config = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 3,
+            eeprom_data_version: Some(3),
             vstr: "KUNBUS GmbH".to_string(),
             pstr: "RevPi Test".to_string(),
             pid: 666,
@@ -555,7 +612,7 @@ mod tests {
     fn test_raw_no_gpiobanks() -> Result<(), Box<dyn std::error::Error>> {
         let raw_config = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 3,
+            eeprom_data_version: Some(3),
             vstr: "KUNBUS GmbH".to_string(),
             pstr: "RevPi Test".to_string(),
             pid: 666,
@@ -573,11 +630,38 @@ mod tests {
         Ok(())
     }
 
+    #[test]
+    fn test_raw_no_eeprom_data_version() -> Result<(), Box<dyn std::error::Error>> {
+        let raw_config = RawRevPiHatEeprom {
+            version: 1,
+            eeprom_data_version: None,
+            vstr: "KUNBUS GmbH".to_string(),
+            pstr: "RevPi Test".to_string(),
+            pid: 666,
+            prev: 3,
+            pver: 333,
+            dtstr: "revpi-test".to_string(),
+            edate: None,
+            mac: None,
+            serial: None,
+            gpiobanks: Some(vec![GpioBank::new(
+                gpio::GpioBankDrive::Drive8mA,
+                gpio::GpioBankSlew::Default,
+                gpio::GpioBankHysteresis::Default,
+                vec![],
+            )]),
+            include: None,
+        };
+        RevPiHatEeprom::from_raw_definition(&PathBuf::new(), raw_config).unwrap_err();
+
+        Ok(())
+    }
+
     #[sealed_test]
     fn test_template_dir_not_present() -> Result<(), Box<dyn std::error::Error>> {
         let raw_config = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 3,
+            eeprom_data_version: Some(3),
             vstr: "KUNBUS GmbH".to_string(),
             pstr: "RevPi Test".to_string(),
             pid: 666,
@@ -603,7 +687,7 @@ mod tests {
     fn test_template_not_present() -> Result<(), Box<dyn std::error::Error>> {
         let raw_config = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 3,
+            eeprom_data_version: Some(3),
             vstr: "KUNBUS GmbH".to_string(),
             pstr: "RevPi Test".to_string(),
             pid: 666,
@@ -627,7 +711,7 @@ mod tests {
     fn test_empty_template() -> Result<(), Box<dyn std::error::Error>> {
         let raw_config = RawRevPiHatEeprom {
             version: 1,
-            eeprom_data_version: 3,
+            eeprom_data_version: Some(3),
             vstr: "KUNBUS GmbH".to_string(),
             pstr: "RevPi Test".to_string(),
             pid: 666,

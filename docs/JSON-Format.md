@@ -167,7 +167,9 @@ Controls the pull resistors on each gpio.
 
 ### _include_ property
 
-The **include** property has 2 versions. It's either a string that gives the name of the template to include or an object. The allowed properties of the template are only **version**, **eeprom_data_version**, and **gpiobanks**. The version properties need to match the version properties of the definition that includes the template.
+The **include** property has 2 versions. It's either a string that gives the name of the template to include or an object. The allowed properties of the template are only **version**, **eeprom_data_version**, and **gpiobanks**. The **version** property needs to match the **version** property of the definition that includes the template.
+
+If a property is given in both the template and the base file, the property of the base file is taken. Including a template with the **include** property is invalid if all fields in the template are already specified in the base file.
 
 ## Validate own JSON files
 

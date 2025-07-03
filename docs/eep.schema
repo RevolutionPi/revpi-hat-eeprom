@@ -76,14 +76,6 @@
     "title": "RevPi HAT EEPROM JSON",
     "description": "The JSON format used in the revpi hat eeprom tool for additional configuration",
     "type": "object",
-    "oneOf": [
-        {
-            "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "gpiobanks" ]
-        },
-        {
-            "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "include" ]
-        }
-    ],
     "additionalProperties": false,
     "properties": {
         "version": {
@@ -157,9 +149,20 @@
                         "eeprom_data_version": { "$ref": "#/$defs/eeprom_data_version" },
                         "gpiobanks": { "$ref": "#/$defs/gpiobanks" }
                     },
-                    "required": [ "version", "eeprom_data_version", "gpiobanks" ]
+                    "required": [ "version" ]
                 }
             ]
         }
+    },
+    "if": {
+        "include": {
+            "isMember": { "const": true }
+        }
+    },
+    "then": {
+        "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "include" ]
+    },
+    "else": {
+        "required": [ "version", "eeprom_data_version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "gpiobanks" ]
     }
 }
