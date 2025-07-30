@@ -155,9 +155,7 @@
         }
     },
     "if": {
-        "include": {
-            "isMember": { "const": true }
-        }
+        "required": [ "include" ]
     },
     "then": {
         "required": [ "version", "vstr", "pstr", "pid", "prev", "pver", "dtstr", "include" ]
